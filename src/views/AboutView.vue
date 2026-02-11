@@ -8,7 +8,7 @@ import { checkUpdate, openDownloadUrl, type UpdateInfo } from "../api/update";
 
 console.log('[AboutView] 脚本开始执行');
 
-const version = "0.1.1";
+const version = "0.1.2";
 const buildDate = "2026";
 
 const contributors = ref(contributorsList);
