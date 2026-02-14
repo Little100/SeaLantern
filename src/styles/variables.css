@@ -106,6 +106,7 @@
   --sl-bg-tertiary: rgba(226, 232, 240, 0.5);
   --sl-surface: rgba(255, 255, 255, 0.6);
   --sl-surface-hover: rgba(248, 250, 252, 0.7);
+  --sl-surface-solid: #ffffff;
 }
 
 [data-theme="dark"][data-acrylic="true"] {
@@ -114,4 +115,5 @@
   --sl-bg-tertiary: rgba(36, 40, 54, 0.5);
   --sl-surface: rgba(30, 33, 48, 0.6);
   --sl-surface-hover: rgba(40, 44, 62, 0.7);
+  --sl-surface-solid: #1e2130;
 }

@@ -366,7 +366,7 @@ function handleClearLogs() {
 .log-empty { color: var(--sl-text-tertiary); font-style: italic; }
 .scroll-btn { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); padding: 6px 16px; background: var(--sl-primary); color: white; border-radius: var(--sl-radius-full); font-size: 0.75rem; cursor: pointer; box-shadow: var(--sl-shadow-md); z-index: 10; }
 .console-input-wrapper { position: relative; flex-shrink: 0; }
-.suggestions-popup { position: absolute; bottom: 100%; left: 0; right: 0; background: var(--sl-surface); border: 1px solid var(--sl-border); border-radius: var(--sl-radius-md); margin-bottom: 4px; max-height: 200px; overflow-y: auto; z-index: 20; box-shadow: var(--sl-shadow-md); }
+.suggestions-popup { position: absolute; bottom: 100%; left: 0; right: 0; background: var(--sl-surface-solid, var(--sl-surface)); border: 1px solid var(--sl-border); border-radius: var(--sl-radius-md); margin-bottom: 4px; max-height: 200px; overflow-y: auto; z-index: 20; box-shadow: var(--sl-shadow-md); }
 .suggestion-item { padding: 6px 14px; font-family: var(--sl-font-mono); font-size: 0.8125rem; color: var(--sl-text-primary); cursor: pointer; transition: background var(--sl-transition-fast); }
 .suggestion-item:hover,.suggestion-item.active { background: var(--sl-primary-bg); color: var(--sl-primary); }
 .suggestion-hint { padding: 4px 14px; font-size: 0.6875rem; color: var(--sl-text-tertiary); border-top: 1px solid var(--sl-border-light); }
