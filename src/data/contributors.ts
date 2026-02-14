@@ -5,11 +5,19 @@
  * 无论是代码、设计、建议、文档还是推广，你的名字都值得被记住。
  */
 
+export interface SocialLinks {
+  gitee?: string;
+  github?: string;
+  bilibili?: string;
+  qq?: string;
+  [key: string]: string | undefined;
+}
+
 export interface Contributor {
   name: string;        // 名字或昵称
   role: string;        // 角色描述
   avatar: string;      // 头像 URL
-  url?: string;        // 可选：个人主页链接
+  url?: string | SocialLinks;  // 可选：个人主页链接或更多列表的
 }
 
 export const contributors: Contributor[] = [
@@ -17,7 +25,9 @@ export const contributors: Contributor[] = [
     name: "FPS_Z",
     role: "创始人 / 主要开发者",
     avatar: "https://mc-heads.net/avatar/FPS_Z/64",
-    url: "https://gitee.com/fps_z",
+    url: {
+      gitee: "https://gitee.com/fps_z",
+    },
   },
   {
     name: "鸽德迪",
@@ -53,6 +63,12 @@ export const contributors: Contributor[] = [
     name: "Little_100",
     role: "打杂",
     avatar: "https://minotar.net/avatar/Little100/64",
+    url: {
+      gitee: "https://gitee.com/little_100",
+      github: "https://github.com/Little100",
+      bilibili: "https://space.bilibili.com/1492647738",
+      qq: "2662308929",
+    },
   },
   {
     name: "MinecraftYJQ",

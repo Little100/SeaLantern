@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeMount } from "vue";
+import { ref, computed, onMounted, onBeforeMount } from "vue";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import SLCard from "../components/common/SLCard.vue";
 import SLButton from "../components/common/SLButton.vue";
-import { contributors as contributorsList } from "../data/contributors";
+import { contributors as contributorsList, type SocialLinks } from "../data/contributors";
 import { checkUpdate, type UpdateInfo } from "../api/update";
 import { getAppVersion, BUILD_YEAR } from "../utils/version";
 
@@ -13,6 +13,24 @@ const version = ref('加载中...');
 const buildDate = BUILD_YEAR;
 
 const contributors = ref(contributorsList);
+
+const PAGE_SIZE = 9;
+const currentPage = ref(1);
+
+const totalPages = computed(() => Math.ceil(contributors.value.length / PAGE_SIZE));
+
+const displayedContributors = computed(() => {
+  const end = currentPage.value * PAGE_SIZE;
+  return contributors.value.slice(0, end);
+});
+
+const hasMore = computed(() => currentPage.value < totalPages.value);
+
+function loadMore() {
+  if (hasMore.value) {
+    currentPage.value++;
+  }
+}
 
 // 更新相关状态
 const isCheckingUpdate = ref(false);
@@ -88,6 +106,48 @@ async function handleManualDownload() {
   }
 }
 
+function isSocialLinks(url: string | SocialLinks | undefined): url is SocialLinks {
+  return typeof url === 'object' && url !== null;
+}
+
+async function openSocialLink(url: string) {
+  await openLink(url);
+}
+
+function getSocialTitle(platform: string): string {
+  const titles: Record<string, string> = {
+    gitee: 'Gitee',
+    github: 'GitHub',
+    bilibili: 'Bilibili',
+    qq: 'QQ (点击复制)',
+  };
+  return titles[platform] || platform;
+}
+
+const knownPlatforms = ['gitee', 'github', 'bilibili', 'qq'];
+
+function getCustomLinks(urls: SocialLinks): Array<{platform: string, url: string}> {
+  return Object.entries(urls)
+    .filter(([platform, url]) => !knownPlatforms.includes(platform) && url)
+    .map(([platform, url]) => ({ platform, url: url as string }));
+}
+
+const copiedQQ = ref<string | null>(null);
+
+async function copyQQ(qq: string, contributorName: string) {
+  try {
+    await navigator.clipboard.writeText(qq);
+    copiedQQ.value = contributorName;
+    setTimeout(() => {
+      if (copiedQQ.value === contributorName) {
+        copiedQQ.value = null;
+      }
+    }, 2000);
+  } catch (e) {
+    console.error('[AboutView] 复制失败:', e);
+  }
+}
+
 console.log('[AboutView] 脚本执行完成');
 </script>
 
@@ -137,14 +197,65 @@ console.log('[AboutView] 脚本执行完成');
 
       <div class="contributor-grid">
         <div
-          v-for="c in contributors"
+          v-for="c in displayedContributors"
           :key="c.name"
           class="contributor-card glass-card"
         >
           <img :src="c.avatar" :alt="c.name" class="contributor-avatar" />
-          <div class="contributor-info">
-            <span class="contributor-name">{{ c.name }}</span>
-            <span class="contributor-role">{{ c.role }}</span>
+          <div class="contributor-right">
+            <div class="contributor-info">
+              <span class="contributor-name">{{ c.name }}</span>
+              <span class="contributor-role" :title="c.role">{{ c.role }}</span>
+            </div>
+            <div v-if="c.url" class="contributor-social">
+            <a v-if="typeof c.url === 'string'" class="social-icon" @click.prevent="openLink(c.url)" title="主页">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </a>
+            <template v-else-if="isSocialLinks(c.url)">
+              <a v-if="c.url.gitee" class="social-icon" @click.prevent="openSocialLink(c.url.gitee)" title="Gitee">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.984 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.016 0zm6.09 5.333c.328 0 .593.266.592.593v1.482a.594.594 0 0 1-.593.592H9.777c-.982 0-1.778.796-1.778 1.778v5.63c0 .327.266.592.593.592h5.63c.982 0 1.778-.796 1.778-1.778v-.296a.593.593 0 0 0-.592-.593h-4.15a.592.592 0 0 1-.592-.592v-1.482a.593.593 0 0 1 .593-.592h6.815c.327 0 .593.265.593.592v3.408a4 4 0 0 1-4 4H5.926a.593.593 0 0 1-.593-.593V9.778a4.444 4.444 0 0 1 4.445-4.444h8.296z"/>
+                </svg>
+              </a>
+              <a v-if="c.url.github" class="social-icon" @click.prevent="openSocialLink(c.url.github)" title="GitHub">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </a>
+              <a v-if="c.url.bilibili" class="social-icon" @click.prevent="openSocialLink(c.url.bilibili)" title="Bilibili">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/>
+                </svg>
+              </a>
+              <a v-if="c.url.qq" class="social-icon" :class="{ copied: copiedQQ === c.name }" @click.prevent="copyQQ(c.url.qq, c.name)" :title="copiedQQ === c.name ? '已复制!' : 'QQ (点击复制)'">
+                <!-- 已复制状态 - 显示对勾 -->
+                <svg v-if="copiedQQ === c.name" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <!-- 默认状态 - 显示QQ图标 -->
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.9139 14.529C19.7336 13.955 19.4877 13.2856 19.2385 12.643L18.3288 10.3969C18.3295 10.371 18.3408 9.92858 18.3408 9.70053C18.3408 5.8599 16.5082 2.00037 12.0009 2C7.49403 2.00037 5.66113 5.8599 5.66113 9.70053C5.66113 9.92858 5.67237 10.371 5.67312 10.3969L4.76379 12.643C4.51453 13.2856 4.26827 13.955 4.08798 14.529C3.2285 17.2657 3.507 18.3982 3.71915 18.4238C4.17419 18.4779 5.49021 16.3635 5.49021 16.3635C5.49021 17.5879 6.12741 19.1858 7.5064 20.3398C6.99064 20.4971 6.35868 20.7388 5.95237 21.0355C5.58729 21.3025 5.63302 21.5743 5.69861 21.6841C5.9876 22.1661 10.6542 21.9918 12.0017 21.8417C13.3488 21.9918 18.0158 22.1661 18.3044 21.6841C18.3704 21.5743 18.4157 21.3025 18.0507 21.0355C17.6443 20.7388 17.012 20.4971 16.4959 20.3395C17.8745 19.1858 18.5117 17.5879 18.5117 16.3635C18.5117 16.3635 19.8281 18.4779 20.2831 18.4238C20.4949 18.3982 20.7734 17.2657 19.9139 14.529Z"/>
+                </svg>
+              </a>
+              <!-- 自定义链接 - 显示问号图标 -->
+              <a 
+                v-for="custom in getCustomLinks(c.url)" 
+                :key="custom.platform" 
+                class="social-icon" 
+                @click.prevent="openSocialLink(custom.url)" 
+                :title="custom.platform"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </a>
+            </template>
+            </div>
           </div>
         </div>
 
@@ -160,6 +271,13 @@ console.log('[AboutView] 脚本执行完成');
             <span class="contributor-role">参与贡献，加入我们</span>
           </div>
         </div>
+      </div>
+
+      <!-- 加载更多按钮 -->
+      <div v-if="hasMore" class="load-more-section">
+        <SLButton variant="secondary" size="sm" @click="loadMore">
+          加载更多 ({{ displayedContributors.length }}/{{ contributors.length }})
+        </SLButton>
       </div>
     </div>
 
@@ -495,6 +613,14 @@ console.log('[AboutView] 脚本执行完成');
   transition: all var(--sl-transition-normal);
 }
 
+.contributor-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
 .contributor-card.clickable {
   cursor: pointer;
 }
@@ -515,20 +641,63 @@ console.log('[AboutView] 脚本执行完成');
 
 .contributor-info {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
   min-width: 0;
+  flex: 1;
 }
 
 .contributor-name {
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--sl-text-primary);
+  flex-shrink: 0;
 }
 
 .contributor-role {
   font-size: 0.75rem;
   color: var(--sl-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.contributor-social {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--sl-radius-sm);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-secondary);
+  cursor: pointer;
+  transition: all var(--sl-transition-fast);
+}
+
+.social-icon:hover {
+  background: var(--sl-primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.social-icon.copied {
+  background: #22c55e;
+  color: white;
+}
+
+.load-more-section {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--sl-space-md);
 }
 
 .join-card {
