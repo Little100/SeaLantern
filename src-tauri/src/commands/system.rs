@@ -30,7 +30,59 @@ pub fn get_system_info() -> Result<serde_json::Value, String> {
     };
     
     let disks = Disks::new_with_refreshed_list();
-    let disk_info: Vec<serde_json::Value> = disks.iter().map(|disk| {
+    
+    let real_disks: Vec<_> = disks.iter().filter(|disk| {
+        let fs = disk.file_system().to_string_lossy().to_lowercase();
+        let mount = disk.mount_point().to_string_lossy().to_string();
+        
+        let virtual_fs = ["tmpfs", "devtmpfs", "sysfs", "proc", "devpts",
+                          "securityfs", "cgroup", "cgroup2", "pstore", "debugfs",
+                          "hugetlbfs", "mqueue", "configfs", "fusectl", "fuse.portal",
+                          "binfmt_misc", "autofs", "efivarfs", "tracefs",
+                          "ramfs", "overlay", "squashfs", "nsfs", "fuse.snapfuse"];
+        if virtual_fs.iter().any(|v| fs == *v) {
+            return false;
+        }
+        
+        if mount.starts_with("/snap/") || mount.starts_with("/snap") {
+            return false;
+        }
+
+        if mount.starts_with("/sys") || mount.starts_with("/proc") || mount == "/dev" {
+            return false;
+        }
+        if mount.starts_with("/run") && !mount.starts_with("/run/media") {
+            return false;
+        }
+        
+        if mount.starts_with("/var/lib/docker") {
+            return false;
+        }
+        
+        if disk.total_space() == 0 {
+            return false;
+        }
+        
+        true
+    }).collect();
+    let mut seen_totals = std::collections::HashSet::new();
+    let mut deduped_disks: Vec<_> = Vec::new();
+    
+    for disk in &real_disks {
+        let fs = disk.file_system().to_string_lossy().to_lowercase();
+        let total = disk.total_space();
+        
+        if fs == "apfs" {
+            if seen_totals.contains(&total) {
+                continue;
+            }
+            seen_totals.insert(total);
+        }
+        
+        deduped_disks.push(*disk);
+    }
+    
+    let disk_info: Vec<serde_json::Value> = real_disks.iter().map(|disk| {
         let total = disk.total_space();
         let available = disk.available_space();
         let used = total.saturating_sub(available);
@@ -51,8 +103,8 @@ pub fn get_system_info() -> Result<serde_json::Value, String> {
         })
     }).collect();
     
-    let total_disk_space: u64 = disks.iter().map(|d| d.total_space()).sum();
-    let total_disk_available: u64 = disks.iter().map(|d| d.available_space()).sum();
+    let total_disk_space: u64 = deduped_disks.iter().map(|d| d.total_space()).sum();
+    let total_disk_available: u64 = deduped_disks.iter().map(|d| d.available_space()).sum();
     let total_disk_used = total_disk_space.saturating_sub(total_disk_available);
     let total_disk_usage = if total_disk_space > 0 {
         (total_disk_used as f64 / total_disk_space as f64 * 100.0) as f32

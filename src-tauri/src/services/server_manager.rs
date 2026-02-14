@@ -13,6 +13,7 @@ pub struct ServerManager {
     pub processes: Mutex<HashMap<String, Child>>,
     pub logs: Mutex<HashMap<String, Vec<String>>>,
     pub data_dir: Mutex<String>,
+    pub commands_cache: Mutex<HashMap<String, Vec<String>>>,
 }
 
 impl ServerManager {
@@ -26,6 +27,7 @@ impl ServerManager {
             processes: Mutex::new(HashMap::new()),
             logs: Mutex::new(logs_map),
             data_dir: Mutex::new(data_dir),
+            commands_cache: Mutex::new(HashMap::new()),
         }
     }
 
@@ -377,6 +379,28 @@ impl ServerManager {
         Ok(())
     }
 
+    /// 发送 Tab 补全请求到服务器
+    /// 向 stdin 写入命令前缀 + Tab 字符
+    pub fn send_tab_complete(&self, id: &str, prefix: &str) -> Result<(), String> {
+        let mut procs = self.processes.lock().unwrap();
+        let child = procs.get_mut(id).ok_or_else(|| "服务器未运行".to_string())?;
+        if let Some(ref mut stdin) = child.stdin {
+            // 发送命令前缀 + Tab 字符
+            write!(stdin, "{}\t", prefix).map_err(|e| format!("发送失败: {}", e))?;
+            stdin.flush().map_err(|e| format!("发送失败: {}", e))?;
+        }
+        Ok(())
+    }
+
+    /// 从日志中解析 Tab 补全结果
+    pub fn get_tab_completions(&self, id: &str) -> Vec<String> {
+        let logs = self.logs.lock().unwrap();
+        if let Some(log_lines) = logs.get(id) {
+            return parse_tab_completions(log_lines);
+        }
+        Vec::new()
+    }
+
     pub fn get_server_list(&self) -> Vec<ServerInstance> {
         self.servers.lock().unwrap().clone()
     }
@@ -397,7 +421,8 @@ impl ServerManager {
         }
     }
 
-    pub fn delete_server(&self, id: &str) -> Result<(), String> {
+    /// 仅从列表中移除服务器（不删除文件）
+    pub fn remove_from_list(&self, id: &str) -> Result<(), String> {
         // Only stop if actually running
         {
             let procs = self.processes.lock().unwrap();
@@ -410,6 +435,34 @@ impl ServerManager {
         self.logs.lock().unwrap().remove(id);
         self.save();
         Ok(())
+    }
+
+    /// 删除服务器及其所有文件
+    pub fn delete_server_files(&self, id: &str) -> Result<(), String> {
+        // 获取服务器路径
+        let server_path = {
+            let servers = self.servers.lock().unwrap();
+            servers.iter().find(|s| s.id == id).map(|s| s.path.clone())
+        };
+
+        // 先从列表移除
+        self.remove_from_list(id)?;
+
+        // 删除服务器文件夹
+        if let Some(path) = server_path {
+            let server_dir = std::path::Path::new(&path);
+            if server_dir.exists() && server_dir.is_dir() {
+                std::fs::remove_dir_all(server_dir)
+                    .map_err(|e| format!("删除服务器文件失败: {}", e))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// 兼容旧接口，默认仅从列表移除
+    pub fn delete_server(&self, id: &str) -> Result<(), String> {
+        self.remove_from_list(id)
     }
 
     pub fn get_logs(&self, id: &str, since: usize) -> Vec<String> {
@@ -429,6 +482,212 @@ impl ServerManager {
         let ids: Vec<String> = self.processes.lock().unwrap().keys().cloned().collect();
         for id in ids { let _ = self.stop_server(&id); }
     }
+
+    pub fn request_commands(&self, id: &str) -> Result<(), String> {
+        let is_running = {
+            let mut procs = self.processes.lock().unwrap();
+            if let Some(child) = procs.get_mut(id) {
+                match child.try_wait() {
+                    Ok(Some(_)) => { procs.remove(id); false }
+                    Ok(None) => true,
+                    Err(_) => { procs.remove(id); false }
+                }
+            } else { false }
+        };
+
+        if !is_running {
+            return Err("服务器未运行".to_string());
+        }
+
+        self.send_command(id, "help")?;
+        Ok(())
+    }
+
+    pub fn get_commands(&self, id: &str) -> Vec<String> {
+        {
+            let cache = self.commands_cache.lock().unwrap();
+            if let Some(cmds) = cache.get(id) {
+                if !cmds.is_empty() {
+                    return cmds.clone();
+                }
+            }
+        }
+
+        let logs = self.logs.lock().unwrap();
+        let mut commands = Vec::new();
+
+        if let Some(log_lines) = logs.get(id) {
+            commands = parse_help_from_logs(log_lines);
+        }
+
+        if !commands.is_empty() {
+            let mut cache = self.commands_cache.lock().unwrap();
+            cache.insert(id.to_string(), commands.clone());
+        }
+
+        if commands.is_empty() {
+            commands = get_default_minecraft_commands();
+        }
+
+        commands
+    }
+
+    pub fn clear_commands_cache(&self, id: &str) {
+        let mut cache = self.commands_cache.lock().unwrap();
+        cache.remove(id);
+    }
+}
+
+fn parse_help_from_logs(logs: &[String]) -> Vec<String> {
+    let mut commands = Vec::new();
+
+    for line in logs.iter().rev().take(500) {
+        let clean_line = strip_ansi_codes(line);
+
+        if let Some(info_pos) = clean_line.find("INFO]:") {
+            let content = clean_line[info_pos + 6..].trim();
+
+            if content.starts_with('/') {
+                if let Some(colon_pos) = content[1..].find(':') {
+                    let cmd = content[1..colon_pos + 1].trim().to_lowercase();
+                    if !cmd.is_empty() && cmd.len() <= 30 && is_valid_command_name(&cmd) {
+                        if !commands.contains(&cmd) {
+                            commands.push(cmd);
+                        }
+                    }
+                }
+            }
+        }
+
+        let trimmed = clean_line.trim();
+        if trimmed.starts_with('/') {
+            if let Some(colon_pos) = trimmed[1..].find(':') {
+                let cmd = trimmed[1..colon_pos + 1].trim().to_lowercase();
+                if !cmd.is_empty() && cmd.len() <= 30 && is_valid_command_name(&cmd) {
+                    if !commands.contains(&cmd) {
+                        commands.push(cmd);
+                    }
+                }
+            }
+        }
+    }
+
+    commands.sort();
+    commands.dedup();
+    commands
+}
+fn strip_ansi_codes(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+
+    while let Some(&ch) = chars.peek() {
+        if ch == '\x1b' {
+            chars.next();
+            if chars.peek() == Some(&'[') {
+                chars.next();
+                while let Some(&c) = chars.peek() {
+                    chars.next();
+                    if c.is_ascii_alphabetic() {
+                        break;
+                    }
+                }
+            }
+        }
+        else if ch == '[' {
+            let mut buf = Vec::new();
+            let mut temp_chars = chars.clone();
+            temp_chars.next();
+            let mut found_m = false;
+            let mut is_ansi = true;
+
+            while let Some(&c) = temp_chars.peek() {
+                if c == 'm' {
+                    found_m = true;
+                    temp_chars.next();
+                    break;
+                } else if c.is_ascii_digit() || c == ';' {
+                    buf.push(c);
+                    temp_chars.next();
+                } else {
+                    is_ansi = false;
+                    break;
+                }
+            }
+
+            if found_m && is_ansi && !buf.is_empty() {
+                chars = temp_chars;
+            } else {
+                result.push(ch);
+                chars.next();
+            }
+        } else {
+            result.push(ch);
+            chars.next();
+        }
+    }
+
+    result
+}
+
+fn is_valid_command_name(cmd: &str) -> bool {
+    !cmd.is_empty() && cmd.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+}
+
+fn parse_tab_completions(logs: &[String]) -> Vec<String> {
+    let mut completions = Vec::new();
+
+    for line in logs.iter().rev().take(20) {
+        let clean_line = strip_ansi_codes(line);
+
+        if clean_line.contains("<--[HERE]") {
+            if let Some(pos) = clean_line.find("<--[HERE]") {
+                let before = clean_line[..pos].trim();
+                if let Some(last_word) = before.split_whitespace().last() {
+                    let completion = last_word.trim().to_string();
+                    if !completion.is_empty() && !completions.contains(&completion) {
+                        completions.push(completion);
+                    }
+                }
+            }
+        }
+
+        if clean_line.contains(',') && !clean_line.contains("INFO]:") {
+            for part in clean_line.split(',') {
+                let completion = part.trim().to_string();
+                if !completion.is_empty() 
+                    && completion.len() <= 30 
+                    && is_valid_command_name(&completion)
+                    && !completions.contains(&completion) {
+                    completions.push(completion);
+                }
+            }
+        }
+    }
+
+    completions
+}
+
+fn get_default_minecraft_commands() -> Vec<String> {
+    vec![
+        "help".into(), "list".into(), "stop".into(), "say".into(),
+        "time".into(), "weather".into(), "gamemode".into(), "difficulty".into(),
+        "give".into(), "tp".into(), "teleport".into(), "kill".into(),
+        "kick".into(), "ban".into(), "pardon".into(), "op".into(), "deop".into(),
+        "whitelist".into(), "gamerule".into(), "save-all".into(), "save-on".into(),
+        "save-off".into(), "seed".into(), "summon".into(), "clear".into(),
+        "effect".into(), "enchant".into(), "experience".into(), "xp".into(),
+        "fill".into(), "setblock".into(), "clone".into(), "execute".into(),
+        "scoreboard".into(), "team".into(), "title".into(), "tellraw".into(),
+        "msg".into(), "tell".into(), "w".into(), "me".into(), "trigger".into(),
+        "advancement".into(), "recipe".into(), "loot".into(), "data".into(),
+        "datapack".into(), "function".into(), "schedule".into(), "reload".into(),
+        "forceload".into(), "locate".into(), "locatebiome".into(), "setworldspawn".into(),
+        "spawnpoint".into(), "spreadplayers".into(), "worldborder".into(),
+        "bossbar".into(), "particle".into(), "playsound".into(), "stopsound".into(),
+        "attribute".into(), "spectate".into(), "defaultgamemode".into(),
+        "tps".into(), "plugins".into(), "pl".into(), "version".into(), "ver".into(),
+        "timings".into(), "paper".into(), "spigot".into(), "restart".into(),
+    ]
 }
 
 fn get_data_dir() -> String {

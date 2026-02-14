@@ -5,6 +5,7 @@ import SLCard from "../components/common/SLCard.vue";
 import SLButton from "../components/common/SLButton.vue";
 import SLBadge from "../components/common/SLBadge.vue";
 import SLProgress from "../components/common/SLProgress.vue";
+import SLModal from "../components/common/SLModal.vue";
 import { useServerStore } from "../stores/serverStore";
 import { useConsoleStore } from "../stores/consoleStore";
 import { serverApi } from "../api/server";
@@ -133,9 +134,52 @@ async function handleStop(id: string) {
   finally { actionLoading.value[id] = false; }
 }
 
-async function handleDelete(id: string) {
-  try { await serverApi.deleteServer(id); await store.refreshList(); }
-  catch (e) { actionError.value = String(e); }
+const deleteModalVisible = ref(false);
+const deleteTargetId = ref<string | null>(null);
+const deleteTargetName = ref<string>("");
+const deleteLoading = ref(false);
+
+function openDeleteModal(id: string) {
+  const server = store.servers.find(s => s.id === id);
+  if (server) {
+    deleteTargetId.value = id;
+    deleteTargetName.value = server.name;
+    deleteModalVisible.value = true;
+  }
+}
+
+function closeDeleteModal() {
+  deleteModalVisible.value = false;
+  deleteTargetId.value = null;
+  deleteTargetName.value = "";
+}
+
+async function handleRemoveFromList() {
+  if (!deleteTargetId.value) return;
+  deleteLoading.value = true;
+  try {
+    await serverApi.removeFromList(deleteTargetId.value);
+    await store.refreshList();
+    closeDeleteModal();
+  } catch (e) {
+    actionError.value = String(e);
+  } finally {
+    deleteLoading.value = false;
+  }
+}
+
+async function handleDeleteFiles() {
+  if (!deleteTargetId.value) return;
+  deleteLoading.value = true;
+  try {
+    await serverApi.deleteServerFiles(deleteTargetId.value);
+    await store.refreshList();
+    closeDeleteModal();
+  } catch (e) {
+    actionError.value = String(e);
+  } finally {
+    deleteLoading.value = false;
+  }
 }
 </script>
 
@@ -299,12 +343,33 @@ async function handleDelete(id: string) {
           <SLButton variant="ghost" size="sm" @click="store.setCurrentServer(server.id); router.push('/config/' + server.id)">
             配置
           </SLButton>
-          <SLButton variant="ghost" size="sm" @click="handleDelete(server.id)">
+          <SLButton variant="ghost" size="sm" @click="openDeleteModal(server.id)">
             删除
           </SLButton>
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <SLModal :visible="deleteModalVisible" title="删除服务器" @close="closeDeleteModal">
+      <div class="delete-modal-content">
+        <p class="delete-modal-text">
+          确定要删除服务器 <strong>{{ deleteTargetName }}</strong> 吗？
+        </p>
+        <p class="delete-modal-hint">请选择删除方式：</p>
+      </div>
+      <template #footer>
+        <SLButton variant="ghost" size="sm" @click="closeDeleteModal" :disabled="deleteLoading">
+          取消
+        </SLButton>
+        <SLButton variant="secondary" size="sm" @click="handleRemoveFromList" :loading="deleteLoading">
+          仅从列表移除
+        </SLButton>
+        <SLButton variant="danger" size="sm" @click="handleDeleteFiles" :loading="deleteLoading">
+          删除服务端文件
+        </SLButton>
+      </template>
+    </SLModal>
 
     <!-- Recent Alerts -->
     <div v-if="recentAlerts.length > 0" class="alerts-section">
@@ -592,5 +657,22 @@ async function handleDelete(id: string) {
 
 @media (max-width: 900px) {
   .top-row { grid-template-columns: 1fr; }
+}
+
+/* Delete Modal */
+.delete-modal-content {
+  text-align: center;
+}
+.delete-modal-text {
+  font-size: 0.9375rem;
+  color: var(--sl-text-primary);
+  margin-bottom: var(--sl-space-sm);
+}
+.delete-modal-text strong {
+  color: var(--sl-primary);
+}
+.delete-modal-hint {
+  font-size: 0.8125rem;
+  color: var(--sl-text-secondary);
 }
 </style>

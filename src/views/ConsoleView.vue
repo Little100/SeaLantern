@@ -26,19 +26,55 @@ const stopLoading = ref(false);
 const isPolling = ref(false);  // 添加轮询锁
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
-const allCommands = [
-  "help", "list", "stop", "say",
-  "time set day", "time set night", "time set noon",
-  "weather clear", "weather rain", "weather thunder",
-  "gamemode survival", "gamemode creative", "gamemode adventure", "gamemode spectator",
-  "difficulty peaceful", "difficulty easy", "difficulty normal", "difficulty hard",
-  "give", "tp", "teleport", "kill", "kick", "ban", "pardon",
-  "op", "deop", "whitelist add", "whitelist remove", "whitelist list",
-  "gamerule keepInventory true", "gamerule keepInventory false",
-  "gamerule doDaylightCycle true", "gamerule doDaylightCycle false",
-  "gamerule mobGriefing true", "gamerule mobGriefing false",
-  "save-all", "tps", "plugins", "version",
-];
+const serverCommands = ref<string[]>([]);
+const commandsLoading = ref(false);
+const commandsRequested = ref(false);
+
+const userCommands = ref<string[]>([]);
+
+const commandArgs: Record<string, string[]> = {
+  gamemode: ["survival", "creative", "adventure", "spectator"],
+  difficulty: ["peaceful", "easy", "normal", "hard"],
+  time: ["set day", "set night", "set noon", "set midnight", "set 0", "add 1000", "query daytime", "query gametime"],
+  weather: ["clear", "rain", "thunder"],
+  gamerule: [
+    "keepInventory true", "keepInventory false",
+    "doDaylightCycle true", "doDaylightCycle false",
+    "mobGriefing true", "mobGriefing false",
+    "doFireTick true", "doFireTick false",
+    "doMobSpawning true", "doMobSpawning false",
+    "doTileDrops true", "doTileDrops false",
+    "doEntityDrops true", "doEntityDrops false",
+    "commandBlockOutput true", "commandBlockOutput false",
+    "naturalRegeneration true", "naturalRegeneration false",
+    "sendCommandFeedback true", "sendCommandFeedback false",
+    "showDeathMessages true", "showDeathMessages false",
+    "announceAdvancements true", "announceAdvancements false",
+  ],
+  whitelist: ["add", "remove", "list", "on", "off", "reload"],
+  effect: ["give", "clear"],
+  fill: ["replace", "destroy", "hollow", "keep", "outline"],
+  clone: ["replace", "masked", "filtered"],
+  execute: ["as", "at", "positioned", "rotated", "facing", "align", "anchored", "in", "if", "unless", "store", "run"],
+  data: ["get", "merge", "modify", "remove"],
+  scoreboard: ["objectives", "players"],
+  team: ["add", "remove", "empty", "join", "leave", "list", "modify"],
+  bossbar: ["add", "remove", "list", "set", "get"],
+  worldborder: ["add", "center", "damage", "get", "set", "warning"],
+  forceload: ["add", "remove", "query"],
+  schedule: ["function", "clear"],
+  datapack: ["enable", "disable", "list"],
+  advancement: ["grant", "revoke"],
+  recipe: ["give", "take"],
+  loot: ["give", "insert", "replace", "spawn"],
+  attribute: ["get", "base", "modifier"],
+  item: ["modify", "replace"],
+  place: ["feature", "jigsaw", "structure", "template"],
+  random: ["value", "roll", "reset"],
+  tick: ["query", "rate", "step", "sprint", "unfreeze", "freeze"],
+  transfer: [],
+  return: ["fail", "run"],
+};
 
 const quickCommands = [
   { label: "白天", cmd: "time set day" },
@@ -53,10 +89,124 @@ const quickCommands = [
   { label: "怪物破坏 关", cmd: "gamerule mobGriefing false" },
 ];
 
+const allAvailableCommands = computed(() => {
+  const combined = [...serverCommands.value, ...userCommands.value];
+  return [...new Set(combined)].sort();
+});
+
+function ansiToHtml(text: string): string {
+  let escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  let result = '';
+  let openSpans = 0;
+  let i = 0;
+
+  while (i < escaped.length) {
+    let seqStart = -1;
+    let seqContentStart = -1;
+
+    if (escaped[i] === '\x1b' && i + 1 < escaped.length && escaped[i + 1] === '[') {
+      seqStart = i;
+      seqContentStart = i + 2;
+    } else if (escaped[i] === '[' && i + 1 < escaped.length && /[0-9]/.test(escaped[i + 1])) {
+      let j = i + 1;
+      let valid = true;
+      while (j < escaped.length) {
+        if (escaped[j] === 'm') break;
+        if (/[0-9;]/.test(escaped[j])) { j++; } else { valid = false; break; }
+      }
+      if (valid && j < escaped.length && escaped[j] === 'm') {
+        seqStart = i;
+        seqContentStart = i + 1;
+      }
+    }
+
+    if (seqStart >= 0) {
+      let params = '';
+      let j = seqContentStart;
+      while (j < escaped.length && escaped[j] !== 'm') {
+        params += escaped[j];
+        j++;
+      }
+      if (j < escaped.length && escaped[j] === 'm') {
+        j++;
+        const codes = params.split(';').map(Number);
+        let style = '';
+        let ci = 0;
+        while (ci < codes.length) {
+          const code = codes[ci];
+          if (code === 0) {
+            while (openSpans > 0) { result += '</span>'; openSpans--; }
+          } else if (code === 1) { style += 'font-weight:bold;'; }
+          else if (code === 3) { style += 'font-style:italic;'; }
+          else if (code === 4) { style += 'text-decoration:underline;'; }
+          else if (code === 38 && ci + 1 < codes.length && codes[ci + 1] === 2 && ci + 4 < codes.length) {
+            const r = codes[ci + 2], g = codes[ci + 3], b = codes[ci + 4];
+            style += `color:rgb(${r},${g},${b});`;
+            ci += 4;
+          } else if (code === 48 && ci + 1 < codes.length && codes[ci + 1] === 2 && ci + 4 < codes.length) {
+            const r = codes[ci + 2], g = codes[ci + 3], b = codes[ci + 4];
+            style += `background-color:rgb(${r},${g},${b});`;
+            ci += 4;
+          } else if (code >= 30 && code <= 37) {
+            const colors = ['#000','#c00','#0a0','#c50','#00c','#c0c','#0cc','#ccc'];
+            style += `color:${colors[code - 30]};`;
+          } else if (code >= 90 && code <= 97) {
+            const colors = ['#555','#f55','#5f5','#ff5','#55f','#f5f','#5ff','#fff'];
+            style += `color:${colors[code - 90]};`;
+          }
+          ci++;
+        }
+        if (style) {
+          result += `<span style="${style}">`;
+          openSpans++;
+        }
+        i = j;
+        continue;
+      }
+    }
+
+    result += escaped[i];
+    i++;
+  }
+
+  while (openSpans > 0) { result += '</span>'; openSpans--; }
+  return result;
+}
+
 const filteredSuggestions = computed(() => {
-  const input = commandInput.value.trim().toLowerCase();
+  if (!isRunning.value) return [];
+  const input = commandInput.value.trim();
   if (!input) return [];
-  return allCommands.filter((c) => c.toLowerCase().startsWith(input) && c.toLowerCase() !== input).slice(0, 8);
+
+  const inputLower = input.toLowerCase();
+  const parts = inputLower.split(/\s+/);
+  const baseCmd = parts[0];
+
+  if (parts.length === 1) {
+    return allAvailableCommands.value
+      .filter((c) => c.toLowerCase().startsWith(inputLower) && c.toLowerCase() !== inputLower)
+      .slice(0, 8);
+  }
+
+  const args = commandArgs[baseCmd];
+  if (args && args.length > 0) {
+    const inputAfterCmd = parts.slice(1).join(" ");
+    const suggestions = args
+      .filter((arg) => arg.toLowerCase().startsWith(inputAfterCmd) && arg.toLowerCase() !== inputAfterCmd)
+      .map((arg) => `${baseCmd} ${arg}`)
+      .slice(0, 8);
+
+    if (suggestions.length > 0) {
+      return suggestions;
+    }
+  }
+
+  return [];
 });
 
 const serverId = computed(() =>
@@ -76,6 +226,60 @@ const serverStatus = computed(() =>
 const isRunning = computed(() => serverStatus.value === "Running");
 const isStopped = computed(() => serverStatus.value === "Stopped");
 
+watch(isRunning, async (running) => {
+  if (running) {
+    await loadCommandsWithCache();
+  } else {
+    commandsRequested.value = false;
+    serverCommands.value = [];
+  }
+});
+
+async function loadCommandsWithCache() {
+  const sid = serverId.value;
+  if (!sid || commandsLoading.value) return;
+
+  try {
+    const cached = await serverApi.getCommands(sid);
+    if (cached.length > 0) {
+      serverCommands.value = cached;
+    }
+  } catch (_e) {}
+
+  if (!commandsRequested.value) {
+    commandsLoading.value = true;
+    try {
+      await serverApi.requestCommands(sid);
+      commandsRequested.value = true;
+
+      for (let i = 0; i < 4; i++) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        const commands = await serverApi.getCommands(sid);
+        if (commands.length > serverCommands.value.length) {
+          serverCommands.value = commands;
+          break;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load commands:", e);
+    } finally {
+      commandsLoading.value = false;
+    }
+  }
+}
+
+async function refreshCommands() {
+  const sid = serverId.value;
+  if (!sid || !isRunning.value) return;
+
+  try {
+    const commands = await serverApi.getCommands(sid);
+    if (commands.length > serverCommands.value.length) {
+      serverCommands.value = commands;
+    }
+  } catch (_e) {}
+}
+
 watch(() => currentLogs.value.length, () => {
   if (!userScrolledUp.value) doScroll();
 });
@@ -84,6 +288,8 @@ function switchServer(id: string | number) {
   if (serverId.value && logContainer.value) {
     consoleStore.setScrollPosition(serverId.value, logContainer.value.scrollTop);
   }
+  commandsRequested.value = false;
+  serverCommands.value = [];
   consoleStore.setActiveServer(String(id));
   serverStore.setCurrentServer(String(id));
   nextTick(() => restoreScrollPosition());
@@ -103,6 +309,9 @@ onMounted(async () => {
     consoleStore.setActiveServer(serverId.value);
     serverStore.setCurrentServer(serverId.value);
     await serverStore.refreshStatus(serverId.value);
+    if (isRunning.value) {
+      loadCommandsWithCache();
+    }
   }
   startPolling();
   nextTick(() => restoreScrollPosition());
@@ -117,6 +326,7 @@ onUnmounted(() => {
 
 function startPolling() {
   stopPolling();
+  let pollCount = 0;
   pollTimer = setInterval(async () => {
     // 防止并发执行
     if (isPolling.value) return;
@@ -131,9 +341,15 @@ function startPolling() {
         if (newLines.length > 0) {
           consoleStore.appendLogs(sid, newLines);
           consoleStore.setLogCursor(sid, cursor + newLines.length);
+          checkForInvalidCommand(newLines);
         }
       } catch (_e) {}
       await serverStore.refreshStatus(sid);
+
+      pollCount++;
+      if (pollCount % 5 === 0 && commandsRequested.value) {
+        refreshCommands();
+      }
     } finally {
       isPolling.value = false;
     }
@@ -147,10 +363,21 @@ function stopPolling() {
   }
 }
 
+let lastSentCommand = "";
+
 async function sendCommand(cmd?: string) {
   const command = (cmd || commandInput.value).trim();
   const sid = serverId.value;
   if (!command || !sid) return;
+
+  const cmdName = command.split(/\s+/)[0].toLowerCase();
+
+  lastSentCommand = cmdName;
+
+  if (cmdName && !userCommands.value.includes(cmdName) && !serverCommands.value.includes(cmdName)) {
+    userCommands.value.push(cmdName);
+  }
+
   consoleStore.appendLocal(sid, "> " + command);
   commandHistory.value.push(command);
   historyIndex.value = -1;
@@ -162,12 +389,27 @@ async function sendCommand(cmd?: string) {
   doScroll();
 }
 
+function checkForInvalidCommand(logs: string[]) {
+  if (!lastSentCommand) return;
+
+  for (const log of logs.slice(-5)) {
+    const logLower = log.toLowerCase();
+    if (logLower.includes("unknown command") || 
+        logLower.includes("unknown or incomplete command") ||
+        logLower.includes("不存在的命令")) {
+      const idx = userCommands.value.indexOf(lastSentCommand);
+      if (idx !== -1) {
+        userCommands.value.splice(idx, 1);
+      }
+      lastSentCommand = "";
+      break;
+    }
+  }
+}
+
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === "Enter") {
-    if (showSuggestions.value && filteredSuggestions.value.length > 0) {
-      commandInput.value = filteredSuggestions.value[suggestionIndex.value];
-      showSuggestions.value = false;
-    } else { sendCommand(); }
+    sendCommand();
     return;
   }
   if (e.key === "Tab") {
@@ -196,7 +438,7 @@ function handleKeydown(e: KeyboardEvent) {
   }
   if (e.key === "Escape") { showSuggestions.value = false; return; }
   nextTick(() => {
-    showSuggestions.value = commandInput.value.trim().length > 0 && filteredSuggestions.value.length > 0;
+    showSuggestions.value = isRunning.value && commandInput.value.trim().length > 0 && filteredSuggestions.value.length > 0;
     suggestionIndex.value = 0;
   });
 }
@@ -315,7 +557,7 @@ function handleClearLogs() {
           'log-warn': line.includes('[WARN]') || line.includes('WARNING'),
           'log-command': line.startsWith('>'),
           'log-system': line.startsWith('[Sea Lantern]'),
-        }">{{ line }}</div>
+        }" v-html="ansiToHtml(line)"></div>
         <div v-if="currentLogs.length === 0" class="log-empty">等待输出...</div>
       </div>
 

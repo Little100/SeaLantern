@@ -93,7 +93,31 @@ export const serverApi = {
     return tauriInvoke("delete_server", { id });
   },
 
+  async removeFromList(id: string): Promise<void> {
+    return tauriInvoke("remove_server_from_list", { id });
+  },
+
+  async deleteServerFiles(id: string): Promise<void> {
+    return tauriInvoke("delete_server_files", { id });
+  },
+
   async getLogs(id: string, since: number): Promise<string[]> {
     return tauriInvoke("get_server_logs", { id, since });
+  },
+
+  async getCommands(id: string): Promise<string[]> {
+    return tauriInvoke("get_server_commands", { id });
+  },
+
+  async requestCommands(id: string): Promise<void> {
+    return tauriInvoke("request_server_commands", { id });
+  },
+
+  async sendTabComplete(id: string, prefix: string): Promise<void> {
+    return tauriInvoke("send_tab_complete", { id, prefix });
+  },
+
+  async getTabCompletions(id: string): Promise<string[]> {
+    return tauriInvoke("get_tab_completions", { id });
   },
 };

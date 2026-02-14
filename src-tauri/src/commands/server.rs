@@ -81,6 +81,36 @@ pub fn delete_server(id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn remove_server_from_list(id: String) -> Result<(), String> {
+    manager().remove_from_list(&id)
+}
+
+#[tauri::command]
+pub fn delete_server_files(id: String) -> Result<(), String> {
+    manager().delete_server_files(&id)
+}
+
+#[tauri::command]
 pub fn get_server_logs(id: String, since: usize) -> Vec<String> {
     manager().get_logs(&id, since)
+}
+
+#[tauri::command]
+pub fn get_server_commands(id: String) -> Vec<String> {
+    manager().get_commands(&id)
+}
+
+#[tauri::command]
+pub fn request_server_commands(id: String) -> Result<(), String> {
+    manager().request_commands(&id)
+}
+
+#[tauri::command]
+pub fn send_tab_complete(id: String, prefix: String) -> Result<(), String> {
+    manager().send_tab_complete(&id, &prefix)
+}
+
+#[tauri::command]
+pub fn get_tab_completions(id: String) -> Vec<String> {
+    manager().get_tab_completions(&id)
 }
