@@ -1,3 +1,12 @@
+
+# 海晶灯（Sea Lantern）
+
+[简体中文文档](README.md)
+
+[English version Doc(Present)](README-en.md)
+
+
+Minecraft Server Manager · Tauri 2 + Rust + Vue 3
 <div align="center">
 <img src="https://gitee.com/fps_z/SeaLantern/raw/master/src/assets/logo.svg" alt="logo" width="200" height="200">
 
@@ -318,6 +327,7 @@ Frontend/Backend each 3 files,Change one line each for the router and the sideba
 
 GPLv3
 
+## Thank
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=FPSZ/SeaLantern&type=Date)](https://star-history.com/#FPSZ/SeaLantern&Date)
