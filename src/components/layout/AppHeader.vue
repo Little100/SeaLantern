@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18nStore } from "../../stores/i18nStore";
@@ -53,9 +53,25 @@ function setLanguage(locale: string) {
   showLanguageMenu.value = false;
 }
 
-function handleClickOutside() {
-  showLanguageMenu.value = false;
+// 处理点击外部关闭语言菜单
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  // 检查是否点击了语言选择器或语言菜单内部
+  const isLanguageSelector = target.closest(".language-selector");
+  
+  // 如果没有点击语言选择器或语言菜单，则关闭菜单
+  if (!isLanguageSelector) {
+    showLanguageMenu.value = false;
+  }
 }
+
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <template>
@@ -118,8 +134,6 @@ function handleClickOutside() {
         </button>
       </div>
     </div>
-
-    <div v-if="showLanguageMenu" class="click-outside" @click="handleClickOutside"></div>
   </header>
 </template>
 
@@ -266,15 +280,5 @@ function handleClickOutside() {
 .language-item:hover {
   background: var(--sl-primary-bg);
   color: var(--sl-primary);
-}
-
-.click-outside {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  pointer-events: auto;
 }
 </style>

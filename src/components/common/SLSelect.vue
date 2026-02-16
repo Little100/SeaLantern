@@ -4,6 +4,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 interface Option {
   label: string;
   value: string | number;
+  subLabel?: string;
 }
 
 interface Props {
@@ -262,7 +263,10 @@ onUnmounted(() => {
               role="option"
               :aria-selected="option.value === modelValue"
             >
-              <span class="option-label">{{ option.label }}</span>
+              <span class="option-label-wrap">
+                <span class="option-label">{{ option.label }}</span>
+                <span v-if="option.subLabel" class="option-sublabel">{{ option.subLabel }}</span>
+              </span>
               <svg
                 v-if="option.value === modelValue"
                 class="check-icon"
@@ -484,6 +488,23 @@ onUnmounted(() => {
 
 .sl-select-dropdown .sl-select-option .option-label {
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sl-select-dropdown .sl-select-option .option-label-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.sl-select-dropdown .sl-select-option .option-sublabel {
+  font-size: 0.75rem;
+  color: var(--sl-text-tertiary);
+  font-family: var(--sl-font-mono);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
