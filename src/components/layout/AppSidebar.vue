@@ -503,7 +503,7 @@ function isActive(path: string): boolean {
   flex-direction: column;
   z-index: 100;
   border-right: 1px solid var(--sl-border-light);
-  transition: width var(--sl-transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: width;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -584,15 +584,17 @@ function isActive(path: string): boolean {
 .server-selector-button {
   width: 90%;
   padding: var(--sl-space-sm);
-  border: none;
+  border: 1px solid var(--sl-border);
   border-radius: var(--sl-radius-md);
-  background-color: transparent;
-  transition: all var(--sl-transition-fast);
+  background-color: var(--sl-surface);
+  transition: all 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  min-height: 40px;
+  will-change: width, border, background-color, padding, align-items;
 }
 
 .sidebar.collapsed .server-selector-button {
@@ -600,9 +602,13 @@ function isActive(path: string): boolean {
   height: 40px;
   align-items: center;
   padding: var(--sl-space-xs);
+  border: none;
+  background-color: transparent;
+  min-height: 40px;
 }
 
 .server-selector-button:hover {
+  border-color: var(--sl-primary);
   background-color: var(--sl-primary-bg);
 }
 
