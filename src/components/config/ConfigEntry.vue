@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { i18n } from "../../locales";
 import SLInput from "../common/SLInput.vue";
 import SLSwitch from "../common/SLSwitch.vue";
 import SLBadge from "../common/SLBadge.vue";
@@ -16,15 +17,15 @@ const emit = defineEmits<{
 }>();
 
 function handleValueChange(value: string) {
-  emit('updateValue', props.entry.key, value);
+  emit("updateValue", props.entry.key, value);
 }
 
 function handleSwitchChange(checked: boolean) {
-  emit('updateValue', props.entry.key, checked ? 'true' : 'false');
+  emit("updateValue", props.entry.key, checked ? "true" : "false");
 }
 
 function isBooleanType(entry: ConfigEntry): boolean {
-  return entry.type === 'boolean' || ['true', 'false'].includes(entry.default);
+  return entry.type === "boolean" || ["true", "false"].includes(entry.default);
 }
 </script>
 
@@ -37,10 +38,7 @@ function isBooleanType(entry: ConfigEntry): boolean {
     <div class="entry-description">{{ entry.description }}</div>
     <div class="entry-value">
       <template v-if="isBooleanType(entry)">
-        <SLSwitch
-          v-model="value"
-          @update:modelValue="handleSwitchChange"
-        />
+        <SLSwitch v-model="value" @update:modelValue="handleSwitchChange" />
       </template>
       <template v-else>
         <SLInput
@@ -51,9 +49,7 @@ function isBooleanType(entry: ConfigEntry): boolean {
         />
       </template>
     </div>
-    <div class="entry-default">
-      {{ $t('config.default') }}: {{ entry.default }}
-    </div>
+    <div class="entry-default">{{ i18n.t("config.default") }}: {{ entry.default }}</div>
   </div>
 </template>
 

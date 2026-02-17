@@ -190,7 +190,7 @@ function getJavaLabel(java: JavaInfo): { label: string; subLabel: string } {
   // subLabel: 路径
   const version = java.major_version;
   const arch = java.is_64bit ? i18n.t("common.java_64bit") : i18n.t("common.java_32bit");
-  
+
   // 简化 vendor 名称
   let vendor = java.vendor;
   if (vendor.includes("Oracle") || vendor.includes("Sun")) {
@@ -206,10 +206,10 @@ function getJavaLabel(java: JavaInfo): { label: string; subLabel: string } {
   } else if (vendor.includes("Liberica") || vendor.includes("BellSoft")) {
     vendor = "Liberica";
   }
-  
+
   return {
     label: `Java ${version} ${vendor} ${arch}`,
-    subLabel: java.path
+    subLabel: java.path,
   };
 }
 
@@ -235,7 +235,6 @@ const startupFileLabel = computed(() => {
   }
   return i18n.t("create.jar_file");
 });
-
 </script>
 
 <template>
@@ -325,7 +324,6 @@ const startupFileLabel = computed(() => {
             </div>
           </div>
         </div>
-
 
         <SLInput :label="i18n.t('create.max_memory')" type="number" v-model="maxMemory" />
         <SLInput :label="i18n.t('create.min_memory')" type="number" v-model="minMemory" />
@@ -472,7 +470,8 @@ const startupFileLabel = computed(() => {
 .startup-mode-tabs {
   display: flex;
   gap: 2px;
-  background: var(--sl-bg-secondary);
+  background: var(--sl-surface);
+  border: 1px solid var(--sl-border);
   border-radius: var(--sl-radius-md);
   padding: 3px;
   width: 100%;
@@ -507,10 +506,23 @@ const startupFileLabel = computed(() => {
   text-align: center;
 }
 .startup-mode-tab:hover {
-  color: var(--sl-primary);
+  color: var(--sl-text-primary);
 }
 .startup-mode-tab.active {
   color: var(--sl-primary);
+}
+
+/* 增强暗色模式下的对比度 */
+@media (prefers-color-scheme: dark) {
+  .startup-mode-tab {
+    color: var(--sl-text-tertiary);
+  }
+  .startup-mode-tab:hover {
+    color: var(--sl-text-primary);
+  }
+  .startup-mode-tab.active {
+    color: var(--sl-primary);
+  }
 }
 .jar-picker {
   grid-column: 1 / -1;
