@@ -57,7 +57,7 @@ const handleInput = (e: Event) => {
 .sl-input-label {
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--sl-text-secondary);
 }
 
 .sl-input-container {
@@ -65,7 +65,7 @@ const handleInput = (e: Event) => {
   align-items: center;
   background: var(--sl-surface, #fff);
   border: 1px solid var(--sl-border, #ddd);
-  border-radius: var(--sl-radius-sm);
+  border-radius: 6px;
   transition:
     border-color var(--sl-transition-fast),
     box-shadow var(--sl-transition-fast);
@@ -76,8 +76,8 @@ const handleInput = (e: Event) => {
 }
 
 .sl-input-container:focus-within {
-  border-color: #007aff;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: var(--sl-primary);
+  box-shadow: 0 0 0 3px var(--sl-primary-bg);
 }
 
 .sl-input {
@@ -96,7 +96,7 @@ const handleInput = (e: Event) => {
 }
 
 .sl-input::placeholder {
-  color: #999;
+  color: var(--sl-text-tertiary);
 }
 
 .sl-input-prefix,
@@ -104,6 +104,6 @@ const handleInput = (e: Event) => {
   display: flex;
   align-items: center;
   padding: 0 8px;
-  color: #999;
+  color: var(--sl-text-tertiary);
 }
 </style>
