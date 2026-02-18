@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
+import { Check, ChevronDown, Loader2, Search } from "lucide-vue-next";
 import { i18n } from "../../locales";
 
 interface Option {
@@ -63,13 +64,33 @@ const filteredOptions = computed(() => {
 const updateDropdownPosition = () => {
   if (!containerRef.value) return;
   const rect = containerRef.value.getBoundingClientRect();
-  dropdownStyle.value = {
-    position: "fixed",
-    top: `${rect.bottom + 4}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-    zIndex: "99999",
-  };
+  const viewportHeight = window.innerHeight;
+  const dropdownMaxHeight = parseInt(props.maxHeight) || 280;
+  const spaceBelow = viewportHeight - rect.bottom;
+  const spaceAbove = rect.top;
+  const gap = 4;
+
+  const openUpward = spaceBelow < dropdownMaxHeight + gap && spaceAbove > spaceBelow;
+
+  if (openUpward) {
+    dropdownStyle.value = {
+      position: "fixed",
+      bottom: `${viewportHeight - rect.top + gap}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      zIndex: "99999",
+      maxHeight: `${Math.min(spaceAbove - gap, dropdownMaxHeight)}px`,
+    };
+  } else {
+    dropdownStyle.value = {
+      position: "fixed",
+      top: `${rect.bottom + gap}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      zIndex: "99999",
+      maxHeight: `${Math.min(spaceBelow - gap, dropdownMaxHeight)}px`,
+    };
+  }
 };
 
 const toggleDropdown = () => {
@@ -200,9 +221,7 @@ onUnmounted(() => {
       :aria-disabled="disabled"
     >
       <span v-if="loading" class="sl-select-loading" aria-live="polite">
-        <svg class="spinner" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" />
-        </svg>
+        <Loader2 class="spinner" :size="16" aria-hidden="true" />
         {{ i18n.t("common.loading") }}
       </span>
       <span
@@ -214,39 +233,23 @@ onUnmounted(() => {
       </span>
       <span v-else class="sl-select-placeholder">{{ placeholder }}</span>
 
-      <svg
+      <ChevronDown
         class="sl-select-arrow"
         :class="{ open: isOpen }"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        :size="16"
         aria-hidden="true"
-      >
-        <path d="M6 9l6 6 6-6" />
-      </svg>
+      />
     </div>
 
     <Teleport to="body">
       <Transition name="dropdown">
         <div v-if="isOpen" class="sl-select-dropdown" ref="dropdownRef" :style="dropdownStyle">
           <div v-if="searchable" class="sl-select-search">
-            <svg
+            <Search
               class="search-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+              :size="16"
               aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
+            />
             <input
               ref="inputRef"
               v-model="searchQuery"
@@ -280,19 +283,12 @@ onUnmounted(() => {
                 <span class="option-label">{{ option.label }}</span>
                 <span v-if="option.subLabel" class="option-sublabel">{{ option.subLabel }}</span>
               </span>
-              <svg
+              <Check
                 v-if="option.value === modelValue"
                 class="check-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
+                :size="16"
                 aria-hidden="true"
-              >
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
+              />
             </div>
           </div>
         </div>
@@ -408,10 +404,12 @@ onUnmounted(() => {
   overflow: hidden;
   backdrop-filter: blur(20px);
   will-change: transform, opacity;
+  color: var(--sl-text-primary);
 }
 
 :root[data-theme="light"] .sl-select-dropdown {
   background: var(--sl-surface, #ffffff);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 :root[data-acrylic="true"][data-theme="dark"] .sl-select-dropdown {
@@ -465,7 +463,7 @@ onUnmounted(() => {
 
 .sl-select-dropdown .sl-select-options::-webkit-scrollbar-thumb {
   background: var(--sl-border);
-  border-radius: var(--sl-radius-sm);
+  border-radius: 3px;
 }
 
 .sl-select-dropdown .sl-select-options::-webkit-scrollbar-thumb:hover {
