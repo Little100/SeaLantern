@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { watch, onUnmounted, ref, nextTick } from 'vue';
+import { X } from 'lucide-vue-next';
 import { i18n } from "../../locales";
 
 interface Props {
@@ -6,11 +8,13 @@ interface Props {
   title?: string;
   width?: string;
   closeOnOverlay?: boolean;
+  autoClose?: number;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   width: "480px",
   closeOnOverlay: true,
+  autoClose: 0,
 });
 
 const emit = defineEmits<{
@@ -18,12 +22,77 @@ const emit = defineEmits<{
 }>();
 
 const handleClose = () => emit("close");
+
+// 模态框引用和焦点管理
+const modalRef = ref<HTMLElement | null>(null);
+let previousActiveElement: Element | null = null;
+
+// ESC 键关闭处理
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    handleClose();
+  }
+}
+
+// 自动关闭定时器
+let autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+// 监听 visible 变化，设置自动关闭和焦点管理
+watch(() => props.visible, (newVisible) => {
+  // 清除之前的定时器
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer);
+    autoCloseTimer = null;
+  }
+  
+  if (newVisible) {
+    // 保存当前焦点元素
+    previousActiveElement = document.activeElement;
+    // 聚焦到模态框
+    nextTick(() => {
+      modalRef.value?.focus();
+    });
+    // 添加键盘事件监听
+    document.addEventListener('keydown', handleKeydown);
+    
+    // 如果设置了自动关闭时间
+    if (props.autoClose > 0) {
+      autoCloseTimer = setTimeout(() => {
+        handleClose();
+      }, props.autoClose);
+    }
+  } else {
+    // 移除键盘事件监听
+    document.removeEventListener('keydown', handleKeydown);
+    // 恢复之前的焦点
+    if (previousActiveElement instanceof HTMLElement) {
+      previousActiveElement.focus();
+    }
+    previousActiveElement = null;
+  }
+}, { immediate: true });
+
+// 组件卸载时清理
+onUnmounted(() => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer);
+  }
+  document.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <template>
   <Teleport to="body">
     <div v-if="visible" class="sl-modal-overlay" @click="closeOnOverlay && handleClose()">
-      <div class="sl-modal glass-strong" :style="{ maxWidth: width }" @click.stop>
+      <div
+        ref="modalRef"
+        class="sl-modal glass-strong"
+        :style="{ maxWidth: width }"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        @click.stop
+      >
         <div class="sl-modal-header">
           <h3 v-if="title" class="sl-modal-title">{{ title }}</h3>
           <button
@@ -31,9 +100,7 @@ const handleClose = () => emit("close");
             @click="handleClose"
             :aria-label="i18n.t('common.close_modal')"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path d="M18 6 6 18 M6 6l12 12" stroke="currentColor" stroke-width="2" />
-            </svg>
+            <X :size="18" />
           </button>
         </div>
         <div class="sl-modal-body">
@@ -51,7 +118,7 @@ const handleClose = () => emit("close");
 .sl-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,16 +207,24 @@ const handleClose = () => emit("close");
   }
 }
 
-/* 性能优化：减少复合图层 */
 .sl-modal-overlay,
 .sl-modal {
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
 
-/* 毛玻璃效果可选，默认关闭以节省性能 */
 .glass-strong {
   backdrop-filter: blur(4px);
   background: var(--sl-surface, rgba(255, 255, 255, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.sl-modal-title {
+  color: var(--color-text-primary, #f1f5f9);
+}
+
+.sl-modal-body {
+  color: var(--color-text-secondary, #cbd5e1);
 }
 </style>
