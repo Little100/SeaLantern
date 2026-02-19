@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed } from "vue";
 import { useContextMenuStore, type ContextMenuItem } from "@/stores/contextMenuStore";
 
 const contextMenuStore = useContextMenuStore();
@@ -40,63 +40,30 @@ const menuStyle = computed(() => {
 function handleItemClick(item: ContextMenuItem) {
   contextMenuStore.handleItemClick(item);
 }
-
-function handleClickOutside(event: MouseEvent) {
-  if (menuRef.value && !menuRef.value.contains(event.target as Node)) {
-    contextMenuStore.hideContextMenu();
-  }
-}
-
-function handleKeydown(event: KeyboardEvent) {
-  if (event.key === "Escape") {
-    contextMenuStore.hideContextMenu();
-  }
-}
-
-watch(
-  () => contextMenuStore.visible,
-  (visible) => {
-    if (visible) {
-      setTimeout(() => {
-        document.addEventListener("click", handleClickOutside);
-        document.addEventListener("contextmenu", handleClickOutside);
-      }, 0);
-      document.addEventListener("keydown", handleKeydown);
-    } else {
-      document.removeEventListener("click", handleClickOutside);
-      document.removeEventListener("contextmenu", handleClickOutside);
-      document.removeEventListener("keydown", handleKeydown);
-    }
-  }
-);
-
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-  document.removeEventListener("contextmenu", handleClickOutside);
-  document.removeEventListener("keydown", handleKeydown);
-});
 </script>
 
 <template>
   <Teleport to="body">
     <Transition name="context-menu-fade">
-      <div
-        v-if="contextMenuStore.visible"
-        ref="menuRef"
-        class="sl-context-menu"
-        :style="menuStyle"
-      >
+      <div v-if="contextMenuStore.visible" class="sl-context-menu-backdrop" @click="contextMenuStore.hideContextMenu()" @contextmenu.prevent.stop="contextMenuStore.hideContextMenu()">
         <div
-          v-for="item in contextMenuStore.items"
-          :key="`${item.pluginId}-${item.id}`"
-          class="sl-context-menu-item"
-          @click="handleItemClick(item)"
+          ref="menuRef"
+          class="sl-context-menu"
+          :style="menuStyle"
+          @click.stop
         >
-          <span v-if="item.icon" class="sl-context-menu-icon">{{ item.icon }}</span>
-          <span class="sl-context-menu-label">{{ item.label }}</span>
-        </div>
-        <div v-if="contextMenuStore.items.length === 0" class="sl-context-menu-empty">
-          No menu items
+          <div
+            v-for="item in contextMenuStore.items"
+            :key="`${item.pluginId}-${item.id}`"
+            class="sl-context-menu-item"
+            @click="handleItemClick(item)"
+          >
+            <span v-if="item.icon" class="sl-context-menu-icon">{{ item.icon }}</span>
+            <span class="sl-context-menu-label">{{ item.label }}</span>
+          </div>
+          <div v-if="contextMenuStore.items.length === 0" class="sl-context-menu-empty">
+            No menu items
+          </div>
         </div>
       </div>
     </Transition>
@@ -104,6 +71,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.sl-context-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+}
+
 .sl-context-menu {
   position: fixed;
   background: rgba(30, 30, 46, 0.95);
@@ -115,7 +88,7 @@ onUnmounted(() => {
   min-width: 160px;
   max-width: 280px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 9999;
+  z-index: 100001;
   user-select: none;
 }
 

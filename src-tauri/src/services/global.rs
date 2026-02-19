@@ -1,3 +1,4 @@
+use super::i18n::I18nService;
 use super::join_manager::JoinManager;
 use super::mod_manager::ModManager;
 use super::server_id_manager::ServerIdManager;
@@ -15,9 +16,14 @@ pub fn settings_manager() -> &'static SettingsManager {
     INSTANCE.get_or_init(SettingsManager::new)
 }
 
+pub fn i18n_service() -> &'static I18nService {
+    static INSTANCE: OnceLock<I18nService> = OnceLock::new();
+    INSTANCE.get_or_init(I18nService::new)
+}
+
 pub fn mod_manager() -> &'static ModManager {
     static INSTANCE: OnceLock<ModManager> = OnceLock::new();
-    INSTANCE.get_or_init(ModManager::new)
+    INSTANCE.get_or_init(|| ModManager::new().expect("Failed to initialize ModManager"))
 }
 
 pub fn join_manager() -> &'static JoinManager {

@@ -3,16 +3,54 @@ import { ref, onMounted, onUnmounted } from "vue";
 import AppLayout from "./components/layout/AppLayout.vue";
 import SplashScreen from "./components/splash/SplashScreen.vue";
 import UpdateModal from "./components/common/UpdateModal.vue";
+import SLContextMenu from "./components/common/SLContextMenu.vue";
+import { PluginComponentRenderer } from "./components/plugin";
 import { useUpdateStore } from "./stores/updateStore";
 import { useSettingsStore } from "./stores/settingsStore";
+import { usePluginStore } from "./stores/pluginStore";
+import { useContextMenuStore } from "./stores/contextMenuStore";
 import { applyTheme, applyFontSize, applyFontFamily } from "./utils/theme";
 
 const showSplash = ref(true);
 const isInitializing = ref(true);
 const updateStore = useUpdateStore();
 const settingsStore = useSettingsStore();
+const pluginStore = usePluginStore();
+const contextMenuStore = useContextMenuStore();
+
+function handleGlobalContextMenu(event: MouseEvent) {
+  if (contextMenuStore.visible) {
+    event.preventDefault();
+    event.stopPropagation();
+    contextMenuStore.hideContextMenu();
+  }
+
+  const allElements = document.elementsFromPoint(event.clientX, event.clientY) as HTMLElement[];
+  let ctx = "global";
+  let targetData = "";
+
+  for (const el of allElements) {
+    if (el.dataset?.contextMenu) {
+      ctx = el.dataset.contextMenu;
+      targetData = el.dataset.contextMenuTarget ?? "";
+      break;
+    }
+  }
+
+  if (ctx !== "global" && !contextMenuStore.hasMenuItems(ctx)) {
+    ctx = "global";
+  }
+
+  if (!contextMenuStore.hasMenuItems(ctx)) return;
+
+  event.preventDefault();
+  contextMenuStore.showContextMenu(ctx, event.clientX, event.clientY, targetData);
+}
 
 onMounted(async () => {
+  contextMenuStore.initContextMenuListener();
+  document.addEventListener("contextmenu", handleGlobalContextMenu);
+
   try {
     await settingsStore.loadSettings();
     const settings = settingsStore.settings;
@@ -29,6 +67,12 @@ onMounted(async () => {
     } catch (trayErr) {
       console.warn("Failed to set up tray, tray functionality will be unavailable:", trayErr);
     }
+
+    try {
+      await pluginStore.loadPlugins();
+    } catch (pluginErr) {
+      console.warn("Failed to load plugins during startup:", pluginErr);
+    }
   } catch (e) {
     console.error("Failed to load settings during startup:", e);
   } finally {
@@ -36,15 +80,9 @@ onMounted(async () => {
   }
 });
 
-onUnmounted(async () => {
-  // 注意：通常不需要清理托盘，因为应用关闭时会自动清理
-  // 但如果需要手动清理，可以取消注释以下代码
-  // try {
-  //   const { cleanupTray } = await import("./utils/tray");
-  //   await cleanupTray();
-  // } catch (e) {
-  //   console.warn("Failed to cleanup tray:", e);
-  // }
+onUnmounted(() => {
+  document.removeEventListener("contextmenu", handleGlobalContextMenu);
+  contextMenuStore.cleanupContextMenuListener();
 });
 
 function handleSplashReady() {
@@ -70,7 +108,10 @@ function handleUpdateModalClose() {
       v-if="updateStore.isUpdateModalVisible && updateStore.isUpdateAvailable"
       @close="handleUpdateModalClose"
     />
+
+    <PluginComponentRenderer />
   </template>
+  <SLContextMenu />
 </template>
 
 <style>

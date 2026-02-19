@@ -18,13 +18,13 @@ pub struct ModManager {
 }
 
 impl ModManager {
-    pub fn new() -> Self {
-        ModManager {
+    pub fn new() -> Result<Self, String> {
+        Ok(ModManager {
             client: Client::builder()
                 .user_agent("SeaLantern/0.5.0 (contact@manus.im)")
                 .build()
-                .unwrap(),
-        }
+                .map_err(|e| format!("Failed to create HTTP client: {}", e))?,
+        })
     }
 
     pub async fn search_modrinth(
@@ -33,14 +33,15 @@ impl ModManager {
         game_version: &str,
         loader: &str,
     ) -> Result<Vec<ModInfo>, String> {
-        let url = format!(
-            "https://api.modrinth.com/v2/search?query={}&facets=[[\"versions:{}\"],[\"categories:{}\"],[\"project_type:mod\"]]",
-            query, game_version, loader.to_lowercase()
+        let facets = format!(
+            "[[\"versions:{}\"],[\"categories:{}\"],[\"project_type:mod\"]]",
+            game_version,
+            loader.to_lowercase()
         );
-
         let resp = self
             .client
-            .get(&url)
+            .get("https://api.modrinth.com/v2/search")
+            .query(&[("query", query), ("facets", facets.as_str())])
             .send()
             .await
             .map_err(|e| e.to_string())?;

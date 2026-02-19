@@ -20,7 +20,7 @@ interface ContextMenuEvent {
   action: "register" | "unregister";
   plugin_id: string;
   context: string;
-  items: RawMenuItem[];
+  items: string;
 }
 
 interface ContextMenuState {
@@ -53,7 +53,8 @@ export const useContextMenuStore = defineStore("contextMenu", () => {
       }
       const contextMap = registeredMenus.get(ctx)!;
 
-      const menuItems: ContextMenuItem[] = rawItems.map((item) => ({
+      const parsedItems: RawMenuItem[] = JSON.parse(rawItems);
+      const menuItems: ContextMenuItem[] = parsedItems.map((item) => ({
         ...item,
         pluginId: plugin_id,
       }));
@@ -83,7 +84,7 @@ export const useContextMenuStore = defineStore("contextMenu", () => {
 
     try {
       contextMenuEventUnlisten = await listen<ContextMenuEvent>(
-        "plugin-context-menu",
+        "plugin-context-menu-event",
         (event) => {
           handleContextMenuEvent(event.payload);
         }
@@ -107,6 +108,13 @@ export const useContextMenuStore = defineStore("contextMenu", () => {
     posY: number,
     data: string
   ) {
+    invoke("context_menu_show_notify", {
+      context: ctx,
+      targetData: data || null,
+      x: posX,
+      y: posY,
+    }).catch((e) => console.error("[ContextMenu] Failed to notify show:", e));
+
     const allItems: ContextMenuItem[] = [];
 
     const contextMap = registeredMenus.get(ctx);
@@ -142,6 +150,7 @@ export const useContextMenuStore = defineStore("contextMenu", () => {
     items.value = [];
     context.value = "";
     targetData.value = "";
+    invoke("context_menu_hide_notify").catch(() => {});
   }
 
   async function handleItemClick(item: ContextMenuItem) {
@@ -205,6 +214,7 @@ export const useContextMenuStore = defineStore("contextMenu", () => {
     hideContextMenu,
     handleItemClick,
     cleanupPluginMenus,
+    handleContextMenuEvent,
     getState,
     hasMenuItems,
   };

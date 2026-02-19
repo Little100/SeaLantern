@@ -1,5 +1,6 @@
 pub mod config_parser;
 pub mod global;
+pub mod i18n;
 pub mod java_detector;
 pub mod java_installer;
 pub mod join_manager;
