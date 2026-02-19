@@ -1,4 +1,17 @@
 {
+  "languageName": "English",
+  "header": {
+    "chinese": "Simplified Chinese",
+    "english": "English",
+    "chinese_tw": "Traditional Chinese",
+    "deutsch": "German",
+    "spanish": "Spanish",
+    "japanese": "Japanese",
+    "russian": "Russian",
+    "vietnamese": "Vietnamese",
+    "korean": "Korean",
+    "french": "French"
+  },
   "common": {
     "app_name": "Sea Lantern",
     "home": "Home",
@@ -97,39 +110,7 @@
     },
     "collapse_btn": "Collapse Sidebar"
   },
-  "header": {
-    "language": "Language",
-    "chinese": "简体中文",
-    "english": "English",
-    "chinese_tw": "繁體中文",
-    "chinese_jb": "梗体中文",
-    "chinese_dongbei": "东北话",
-    "japanese": "日本語",
-    "upsidedown": "ƎƃuɐuɐW",
-    "chinese_meow": "喵语",
-    "spanish": "Español",
-    "deutsch": "Deutsch",
-    "pirate": "Pirate",
-    "chinese_tj": "天津话",
-    "cantonese": "粤语",
-    "russian": "Русский",
-    "chinese_cy": "川渝话",
-    "chinese_wu": "吴语",
-    "chinese_hokkien": "闽南语",
-    "chinese_hn": "河南话",
-    "chinese_jl": "胶辽官话",
-    "vietnamese": "Tiếng Việt",
-    "british": "British English",
-    "aussie": "Aussie English",
-    "kansaiben": "関西弁",
-    "hokkaidou": "北海道",
-    "korean": "한국어",
-    "north_korean": "조선말",
-    "french": "Français",
-    "french_ca": "Français (Canada)",
-    "spanish_ar": "Español (Argentina)",
-    "huoxing": "焱暒妏"
-  },
+
   "home": {
     "title": "Server Management",
     "no_servers": "No servers yet",
@@ -155,7 +136,13 @@
     "delete_error": "Server name input error, please re-enter",
     "close_window_title": "Close Window",
     "close_window_message": "Are you sure you want to close SeaLantern?",
-    "remember_choice": "Remember my choice"
+    "remember_choice": "Remember my choice",
+    "close_action_minimize": "minimize to tray",
+    "close_action_close": "close window",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "disk": "Disk",
+    "core": "Core"
   },
   "create": {
     "title": "Create Server",
@@ -399,8 +386,6 @@
     "acrylic": "Acrylic Effect (Glass)",
     "acrylic_desc": "Enable Windows system-level acrylic glass effect, compatible with background images",
     "acrylic_not_supported": "Acrylic effect not supported on current system",
-    "senior_mode": "Senior Mode",
-    "senior_mode_desc": "Increase font sizes, spacing, and contrast globally to improve readability for elderly users.",
     "background": "Background Image",
     "background_desc": "Upload an image as software background, supports PNG, JPG, WEBP and other formats",
     "opacity": "Opacity",
@@ -416,16 +401,6 @@
       "contain": "Contain",
       "fill": "Fill",
       "auto": "Auto"
-    },
-    "color_options": {
-      "default": "Default",
-      "midnight": "Midnight",
-      "forest": "Forest",
-      "sunset": "Sunset",
-      "ocean": "Ocean",
-      "rose": "Rose",
-      "zombie": "Zombie",
-      "custom": "Custom"
     },
     "edit_colorplan_options": {
       "light": "Light",
@@ -443,6 +418,9 @@
     "unsaved_changes": "There are unsaved changes",
     "export": "Export",
     "import": "Import",
+    "java_download": "Download Java",
+    "java_download_desc": "If Java is not installed or you need an updated version, you can download it here",
+    "java_download_btn": "Download Java 17 (LTS)",
     "reset": "Restore Defaults",
     "import_settings": "Import Settings",
     "import_desc": "Paste previously exported JSON data",
@@ -509,7 +487,10 @@
     "developer_mode": "Developer Mode",
     "developer_mode_desc": "Enable advanced features and debugging options",
     "developer_mode_toggle": "Toggle Developer Mode",
-    "developer_mode_toggle_desc": "Enable to use debug tools while in developer mode"
+    "developer_mode_toggle_desc": "Enable to use debug tools while in developer mode",
+    "color_options": {
+      "custom": "Custom"
+    }
   },
   "about": {
     "title": "About",
@@ -576,7 +557,24 @@
     "open_link_failed": "Failed to open link",
     "update_check_failed": "Failed to check updates",
     "update_download_failed": "Download failed",
-    "github_repo": "GitHub Repository"
+    "github_repo": "GitHub Repository",
+    "aur_update_available": "AUR Update Available",
+    "install_source": "Installation Source",
+    "aur_window_title_update": "AUR Update Available",
+    "aur_window_title_info": "AUR Version Info",
+    "aur_window_new_version": "New version available on AUR!",
+    "aur_window_aur_version": "You are using AUR version",
+    "aur_window_current_version": "Current version:",
+    "aur_window_latest_version": "Latest version:",
+    "aur_window_release_notes": "📝 Release Notes:",
+    "aur_window_no_notes": "No release notes",
+    "aur_window_single_update": "Single update (recommended):",
+    "aur_window_global_update": "Or global update:",
+    "aur_window_global_note": "⚠️ Note: This will update all packages installed via AUR",
+    "aur_window_copy_tip": "Click copy button, then paste in terminal",
+    "aur_window_copy_success": "Command copied to clipboard",
+    "aur_window_copy_failed": "Copy failed",
+    "aur_window_button": "Got it"
   },
   "tray": {
     "minimize": "Minimize to Tray",

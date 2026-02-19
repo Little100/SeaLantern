@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch, onUnmounted, ref, nextTick } from 'vue';
 import { X } from 'lucide-vue-next';
-import { i18n } from "../../locales";
+import { i18n } from "../../language";
 
 interface Props {
   visible: boolean;
@@ -209,10 +209,10 @@ onUnmounted(() => {
 }
 
 .sl-modal-title {
-  color: var(--color-text-primary, #f1f5f9);
+  color: var(--sl-text-primary);
 }
 
 .sl-modal-body {
-  color: var(--color-text-secondary, #cbd5e1);
+  color: var(--sl-text-secondary);
 }
 </style>
