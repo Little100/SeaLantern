@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Check, Minus } from 'lucide-vue-next';
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { ref } from "vue";
+import { Check, Minus } from "lucide-vue-next";
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 interface Props {
   modelValue?: boolean;
@@ -27,16 +27,18 @@ const handleChange = () => {
   }
 };
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-checkbox-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-checkbox-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLCheckbox',
-  get: (prop) => prop === 'value' ? props.modelValue : undefined,
-  set: (prop, value) => { if (prop === 'value') emit('update:modelValue', !!value) },
+  type: "SLCheckbox",
+  get: (prop) => (prop === "value" ? props.modelValue : undefined),
+  set: (prop, value) => {
+    if (prop === "value") emit("update:modelValue", !!value);
+  },
   call: () => undefined,
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>

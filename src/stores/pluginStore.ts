@@ -1,11 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { listen, emit, type UnlistenFn } from "@tauri-apps/api/event";
-import {
-  registerPluginLocale,
-  addPluginTranslations,
-  removePluginTranslations,
-} from "../language";
+import { registerPluginLocale, addPluginTranslations, removePluginTranslations } from "../language";
 import { useComponentRegistry } from "../composables/useComponentRegistry";
 import { useToast } from "../composables/useToast";
 import DOMPurify from "dompurify";
@@ -45,16 +41,7 @@ interface PluginSidebarEvent {
 
 function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
-    FORBID_TAGS: [
-      "script",
-      "iframe",
-      "object",
-      "embed",
-      "form",
-      "link",
-      "meta",
-      "style",
-    ],
+    FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "link", "meta", "style"],
 
     FORBID_ATTR: ["style"],
     ALLOW_DATA_ATTR: false,
@@ -88,10 +75,7 @@ function sanitizeCss(css: string): string {
     "url(about:blank)",
   );
 
-  sanitized = sanitized.replace(
-    /url\s*\(\s*(['"]?)\s*data:[^)]*\1\s*\)/gi,
-    "url(about:blank)",
-  );
+  sanitized = sanitized.replace(/url\s*\(\s*(['"]?)\s*data:[^)]*\1\s*\)/gi, "url(about:blank)");
 
   sanitized = sanitized.replace(/expression\s*\(/gi, "(");
 
@@ -120,12 +104,15 @@ export const usePluginStore = defineStore("plugin", () => {
     string,
     Array<{ element: Element; eventType: string; handler: EventListener }>
   >();
-  
-  const pendingComponentCreates = new Map<string, Array<{
-    component_type: string;
-    component_id: string;
-    props: Record<string, any>;
-  }>>();
+
+  const pendingComponentCreates = new Map<
+    string,
+    Array<{
+      component_type: string;
+      component_id: string;
+      props: Record<string, any>;
+    }>
+  >();
 
   function consumePendingComponentCreates(pluginId: string) {
     const creates = pendingComponentCreates.get(pluginId) || [];
@@ -143,7 +130,7 @@ export const usePluginStore = defineStore("plugin", () => {
 
   function removePluginComponents(pluginId: string) {
     const creates = pendingComponentCreates.get(pluginId) || [];
-    const componentIds = creates.map(c => c.component_id);
+    const componentIds = creates.map((c) => c.component_id);
     if (componentIds.length > 0) {
       pendingComponentDeletes.set(pluginId, componentIds);
     }
@@ -215,9 +202,7 @@ export const usePluginStore = defineStore("plugin", () => {
 
         await injectPluginCss(pluginId);
 
-        const pluginIndex = plugins.value.findIndex(
-          (p) => p.manifest.id === pluginId,
-        );
+        const pluginIndex = plugins.value.findIndex((p) => p.manifest.id === pluginId);
         if (pluginIndex !== -1) {
           plugins.value[pluginIndex].state = "enabled";
         }
@@ -239,9 +224,7 @@ export const usePluginStore = defineStore("plugin", () => {
       } catch (e) {
         const errorMsg = String(e);
 
-        const pluginIndex = plugins.value.findIndex(
-          (p) => p.manifest.id === pluginId,
-        );
+        const pluginIndex = plugins.value.findIndex((p) => p.manifest.id === pluginId);
         if (pluginIndex !== -1) {
           plugins.value[pluginIndex].state = "disabled";
           removePluginCss(pluginId);
@@ -275,9 +258,7 @@ export const usePluginStore = defineStore("plugin", () => {
         removePluginProxies(pluginId);
         removePluginComponents(pluginId);
 
-        const pluginIndex = plugins.value.findIndex(
-          (p) => p.manifest.id === pluginId,
-        );
+        const pluginIndex = plugins.value.findIndex((p) => p.manifest.id === pluginId);
         if (pluginIndex !== -1) {
           plugins.value[pluginIndex].state = "disabled";
         }
@@ -290,9 +271,7 @@ export const usePluginStore = defineStore("plugin", () => {
         );
 
         for (const disabledId of disabledPlugins) {
-          const idx = plugins.value.findIndex(
-            (p) => p.manifest.id === disabledId,
-          );
+          const idx = plugins.value.findIndex((p) => p.manifest.id === disabledId);
           if (idx !== -1) {
             plugins.value[idx].state = "disabled";
             removePluginCss(disabledId);
@@ -453,10 +432,7 @@ export const usePluginStore = defineStore("plugin", () => {
       const result = await pluginApi.installPluginsBatch(paths);
       if (result.failed.length > 0) {
         for (const item of result.failed) {
-          console.error(
-            `[Plugin] Batch install failed for "${item.path}":`,
-            item.error,
-          );
+          console.error(`[Plugin] Batch install failed for "${item.path}":`, item.error);
         }
       }
       await loadPlugins();
@@ -495,10 +471,7 @@ export const usePluginStore = defineStore("plugin", () => {
     }
   }
 
-  async function setPluginSettings(
-    pluginId: string,
-    settings: any,
-  ): Promise<void> {
+  async function setPluginSettings(pluginId: string, settings: any): Promise<void> {
     try {
       await pluginApi.setPluginSettings(pluginId, settings);
 
@@ -539,9 +512,7 @@ export const usePluginStore = defineStore("plugin", () => {
   }
 
   function removePluginCss(pluginId: string) {
-    document
-      .querySelectorAll(`style[data-plugin-id="${pluginId}"]`)
-      .forEach((el) => el.remove());
+    document.querySelectorAll(`style[data-plugin-id="${pluginId}"]`).forEach((el) => el.remove());
 
     if (hasCapability(pluginId, "theme-provider")) {
       removeThemeSettings();
@@ -667,9 +638,7 @@ export const usePluginStore = defineStore("plugin", () => {
     }
     customCss += "}\n";
 
-    let customEl = document.getElementById(
-      PLUGIN_THEME_CUSTOM_STYLE_ID,
-    ) as HTMLStyleElement | null;
+    let customEl = document.getElementById(PLUGIN_THEME_CUSTOM_STYLE_ID) as HTMLStyleElement | null;
     if (hasCustom) {
       if (!customEl) {
         customEl = document.createElement("style");
@@ -693,10 +662,7 @@ export const usePluginStore = defineStore("plugin", () => {
       if (!settings) return;
 
       if (settings.preset && settings.preset !== "default") {
-        document.documentElement.setAttribute(
-          "data-theme-preset",
-          settings.preset,
-        );
+        document.documentElement.setAttribute("data-theme-preset", settings.preset);
       } else {
         document.documentElement.removeAttribute("data-theme-preset");
       }
@@ -753,9 +719,7 @@ export const usePluginStore = defineStore("plugin", () => {
       const root = document.documentElement;
 
       const booleanKeys =
-        plugin.manifest.settings
-          ?.filter((s) => s.type === "boolean")
-          .map((s) => s.key) ?? [];
+        plugin.manifest.settings?.filter((s) => s.type === "boolean").map((s) => s.key) ?? [];
 
       for (const key of booleanKeys) {
         const enabled = settings[key] === true || settings[key] === "true";
@@ -763,17 +727,12 @@ export const usePluginStore = defineStore("plugin", () => {
       }
 
       const numberKeys =
-        plugin.manifest.settings
-          ?.filter((s) => s.type === "number")
-          .map((s) => s.key) ?? [];
+        plugin.manifest.settings?.filter((s) => s.type === "number").map((s) => s.key) ?? [];
 
       for (const key of numberKeys) {
         const value = settings[key];
         if (value !== undefined) {
-          root.style.setProperty(
-            `--plugin-${key.replace(/_/g, "-")}`,
-            String(value),
-          );
+          root.style.setProperty(`--plugin-${key.replace(/_/g, "-")}`, String(value));
         }
       }
     } catch (e) {
@@ -987,13 +946,11 @@ export const usePluginStore = defineStore("plugin", () => {
           }
         });
 
-        document
-          .querySelectorAll(`[data-plugin-inserted="${plugin_id}"]`)
-          .forEach((el) => {
-            if (el.querySelector(target) || el.matches(target)) {
-              el.remove();
-            }
-          });
+        document.querySelectorAll(`[data-plugin-inserted="${plugin_id}"]`).forEach((el) => {
+          if (el.querySelector(target) || el.matches(target)) {
+            el.remove();
+          }
+        });
         break;
       }
 
@@ -1052,7 +1009,9 @@ export const usePluginStore = defineStore("plugin", () => {
           const requestId = parsed.request_id;
           const el = document.querySelector(target);
           const text = el ? (el as HTMLElement).innerText || "" : "";
-          console.log(`[PluginUI] element_get_text: selector=${target}, found=${!!el}, text="${text}", req_id=${requestId}`);
+          console.log(
+            `[PluginUI] element_get_text: selector=${target}, found=${!!el}, text="${text}", req_id=${requestId}`,
+          );
           emit("plugin-element-response", {
             plugin_id,
             request_id: requestId,
@@ -1200,12 +1159,8 @@ export const usePluginStore = defineStore("plugin", () => {
         const el = document.querySelector(target) as HTMLElement | null;
         if (el) {
           const handler = (e: Event) => {
-            const value = (
-              e.target as
-                | HTMLInputElement
-                | HTMLSelectElement
-                | HTMLTextAreaElement
-            ).value;
+            const value = (e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement)
+              .value;
 
             emit("plugin-element-change", {
               plugin_id,
@@ -1218,9 +1173,7 @@ export const usePluginStore = defineStore("plugin", () => {
           if (!eventListenerRegistry.has(plugin_id)) {
             eventListenerRegistry.set(plugin_id, []);
           }
-          eventListenerRegistry
-            .get(plugin_id)!
-            .push({ element: el, eventType: "change", handler });
+          eventListenerRegistry.get(plugin_id)!.push({ element: el, eventType: "change", handler });
         }
         break;
       }
@@ -1229,9 +1182,7 @@ export const usePluginStore = defineStore("plugin", () => {
         const styleId = `plugin-css-${plugin_id}-${element_id}`;
         const css = sanitizeCss(html);
 
-        const existingStyle = document.getElementById(
-          styleId,
-        ) as HTMLStyleElement | null;
+        const existingStyle = document.getElementById(styleId) as HTMLStyleElement | null;
         if (existingStyle) {
           existingStyle.textContent = css;
           existingStyle.setAttribute("data-plugin-id", plugin_id);
@@ -1263,7 +1214,12 @@ export const usePluginStore = defineStore("plugin", () => {
           const validTypes = ["success", "error", "warning", "info"] as const;
           const toastType = validTypes.includes(type) ? type : "info";
           const toast = useToast();
-          (toast[toastType as "success" | "error" | "warning" | "info"] as (msg: string, dur?: number) => void)(message || "", duration);
+          (
+            toast[toastType as "success" | "error" | "warning" | "info"] as (
+              msg: string,
+              dur?: number,
+            ) => void
+          )(message || "", duration);
         } catch (e) {
           console.error("[PluginUI] toast error:", e);
         }
@@ -1279,37 +1235,25 @@ export const usePluginStore = defineStore("plugin", () => {
         element.removeEventListener(eventType, handler);
       }
       eventListenerRegistry.delete(pluginId);
-      console.log(
-        `[PluginUI] Cleaned up event listeners for plugin: ${pluginId}`,
-      );
+      console.log(`[PluginUI] Cleaned up event listeners for plugin: ${pluginId}`);
     }
   }
 
   function removePluginUiElements(pluginId: string) {
-    const elements = document.querySelectorAll(
-      `[data-plugin-id="${pluginId}"]`,
-    );
-    console.log(
-      `[PluginUI] Removing ${elements.length} UI elements for plugin: ${pluginId}`,
-    );
+    const elements = document.querySelectorAll(`[data-plugin-id="${pluginId}"]`);
+    console.log(`[PluginUI] Removing ${elements.length} UI elements for plugin: ${pluginId}`);
     elements.forEach((el) => el.remove());
 
-    const insertedElements = document.querySelectorAll(
-      `[data-plugin-inserted="${pluginId}"]`,
-    );
+    const insertedElements = document.querySelectorAll(`[data-plugin-inserted="${pluginId}"]`);
     insertedElements.forEach((el) => el.remove());
 
-    const hiddenElements = document.querySelectorAll(
-      `[data-plugin-hidden="${pluginId}"]`,
-    );
+    const hiddenElements = document.querySelectorAll(`[data-plugin-hidden="${pluginId}"]`);
     hiddenElements.forEach((el) => {
       (el as HTMLElement).style.display = "";
       delete (el as HTMLElement).dataset.pluginHidden;
     });
 
-    const disabledElements = document.querySelectorAll(
-      `[data-plugin-disabled="${pluginId}"]`,
-    );
+    const disabledElements = document.querySelectorAll(`[data-plugin-disabled="${pluginId}"]`);
     disabledElements.forEach((el) => {
       (el as HTMLElement).removeAttribute("disabled");
       (el as HTMLElement).style.pointerEvents = "";
@@ -1326,13 +1270,10 @@ export const usePluginStore = defineStore("plugin", () => {
     }
 
     try {
-      uiEventUnlisten = await listen<PluginUiEvent>(
-        "plugin-ui-event",
-        (event) => {
-          console.log(`[PluginUI] Received: ${event.payload.action} for ${event.payload.element_id}`);
-          handlePluginUiEvent(event.payload);
-        },
-      );
+      uiEventUnlisten = await listen<PluginUiEvent>("plugin-ui-event", (event) => {
+        console.log(`[PluginUI] Received: ${event.payload.action} for ${event.payload.element_id}`);
+        handlePluginUiEvent(event.payload);
+      });
       console.log("[PluginUI] Event listener initialized");
     } catch (e) {
       console.error("[PluginUI] Failed to initialize event listener:", e);
@@ -1354,39 +1295,30 @@ export const usePluginStore = defineStore("plugin", () => {
     }
 
     try {
-      sidebarEventUnlisten = await listen<PluginSidebarEvent>(
-        "plugin-sidebar-event",
-        (event) => {
-          const { plugin_id, action, label, icon, mode } = event.payload;
+      sidebarEventUnlisten = await listen<PluginSidebarEvent>("plugin-sidebar-event", (event) => {
+        const { plugin_id, action, label, icon, mode } = event.payload;
 
-          if (action === "register") {
-            const sidebarMode: SidebarMode = mode || "self";
+        if (action === "register") {
+          const sidebarMode: SidebarMode = mode || "self";
 
-            const filtered = sidebarItems.value.filter(
-              (item) => item.pluginId !== plugin_id,
-            );
-            filtered.push({
-              pluginId: plugin_id,
-              label,
-              icon: icon || undefined,
-              mode: sidebarMode,
-              showDependents: true,
-              priority: 100,
-            });
+          const filtered = sidebarItems.value.filter((item) => item.pluginId !== plugin_id);
+          filtered.push({
+            pluginId: plugin_id,
+            label,
+            icon: icon || undefined,
+            mode: sidebarMode,
+            showDependents: true,
+            priority: 100,
+          });
 
-            filtered.sort((a, b) => a.priority - b.priority);
-            sidebarItems.value = filtered;
-          } else if (action === "unregister") {
-            sidebarItems.value = sidebarItems.value.filter(
-              (item) => item.pluginId !== plugin_id,
-            );
-          }
+          filtered.sort((a, b) => a.priority - b.priority);
+          sidebarItems.value = filtered;
+        } else if (action === "unregister") {
+          sidebarItems.value = sidebarItems.value.filter((item) => item.pluginId !== plugin_id);
+        }
 
-          console.log(
-            `[PluginSidebar] ${action} sidebar item for plugin: ${plugin_id}`,
-          );
-        },
-      );
+        console.log(`[PluginSidebar] ${action} sidebar item for plugin: ${plugin_id}`);
+      });
       console.log("[PluginSidebar] Event listener initialized");
     } catch (e) {
       console.error("[PluginSidebar] Failed to initialize event listener:", e);
@@ -1446,9 +1378,7 @@ export const usePluginStore = defineStore("plugin", () => {
   function getHighRiskPermissions(pluginId: string): string[] {
     const plugin = plugins.value.find((p) => p.manifest.id === pluginId);
     if (!plugin || !plugin.manifest.permissions) return [];
-    return plugin.manifest.permissions.filter((p) =>
-      HIGH_RISK_PERMISSIONS.includes(p),
-    );
+    return plugin.manifest.permissions.filter((p) => HIGH_RISK_PERMISSIONS.includes(p));
   }
 
   function clearPermissionLogs(pluginId: string) {
@@ -1466,17 +1396,12 @@ export const usePluginStore = defineStore("plugin", () => {
         (event) => {
           const log = event.payload;
           addPermissionLog(log);
-          console.log(
-            `[PluginPermission] ${log.log_type} from ${log.plugin_id}: ${log.action}`,
-          );
+          console.log(`[PluginPermission] ${log.log_type} from ${log.plugin_id}: ${log.action}`);
         },
       );
       console.log("[PluginPermission] Event listener initialized");
     } catch (e) {
-      console.error(
-        "[PluginPermission] Failed to initialize event listener:",
-        e,
-      );
+      console.error("[PluginPermission] Failed to initialize event listener:", e);
     }
   }
 
@@ -1578,9 +1503,7 @@ export const usePluginStore = defineStore("plugin", () => {
           return;
         }
         const handle = reg.get(component_id);
-        const result = handle
-          ? handle.call(event.method!, ...(event.args ?? []))
-          : null;
+        const result = handle ? handle.call(event.method!, ...(event.args ?? [])) : null;
         await reply(result);
         break;
       }
@@ -1589,10 +1512,7 @@ export const usePluginStore = defineStore("plugin", () => {
         const handle = reg.get(component_id);
         if (handle && event.prop) {
           handle.on(event.prop, async (...args: any[]) => {
-            await emit(
-              `plugin:component:event:${plugin_id}:${component_id}:${event.prop}`,
-              args,
-            );
+            await emit(`plugin:component:event:${plugin_id}:${component_id}:${event.prop}`, args);
           });
         }
         break;
@@ -1646,18 +1566,12 @@ export const usePluginStore = defineStore("plugin", () => {
   async function initComponentEventListener() {
     if (componentEventUnlisten) return;
     try {
-      componentEventUnlisten = await listen<PluginComponentEvent>(
-        "plugin:ui:component",
-        (e) => {
-          handlePluginComponentEvent(e.payload);
-        },
-      );
+      componentEventUnlisten = await listen<PluginComponentEvent>("plugin:ui:component", (e) => {
+        handlePluginComponentEvent(e.payload);
+      });
       console.log("[PluginComponent] Event listener initialized");
     } catch (e) {
-      console.error(
-        "[PluginComponent] Failed to initialize event listener:",
-        e,
-      );
+      console.error("[PluginComponent] Failed to initialize event listener:", e);
     }
   }
 
@@ -1673,7 +1587,7 @@ export const usePluginStore = defineStore("plugin", () => {
   function trackPluginComponentSet(pluginId: string, componentId: string, prop: string) {
     if (!pluginComponentSetMap.has(pluginId)) pluginComponentSetMap.set(pluginId, []);
     const list = pluginComponentSetMap.get(pluginId)!;
-    if (!list.find(e => e.componentId === componentId && e.prop === prop)) {
+    if (!list.find((e) => e.componentId === componentId && e.prop === prop)) {
       list.push({ componentId, prop });
     }
   }
@@ -1751,9 +1665,7 @@ export const usePluginStore = defineStore("plugin", () => {
         for (const event of sidebarSnapshot) {
           if (event.action === "register") {
             const sidebarMode: SidebarMode = "self";
-            const filtered = sidebarItems.value.filter(
-              (item) => item.pluginId !== event.plugin_id,
-            );
+            const filtered = sidebarItems.value.filter((item) => item.pluginId !== event.plugin_id);
             filtered.push({
               pluginId: event.plugin_id,
               label: event.label,
@@ -1774,7 +1686,9 @@ export const usePluginStore = defineStore("plugin", () => {
     try {
       const componentSnapshot = await pluginApi.getPluginComponentSnapshot();
       if (componentSnapshot.length > 0) {
-        console.log(`[PluginComponent] Replaying ${componentSnapshot.length} buffered component events`);
+        console.log(
+          `[PluginComponent] Replaying ${componentSnapshot.length} buffered component events`,
+        );
         for (const event of componentSnapshot) {
           try {
             const payload = JSON.parse(event.payload_json);
@@ -1804,12 +1718,14 @@ export const usePluginStore = defineStore("plugin", () => {
     try {
       const contextMenuSnapshot = await pluginApi.getPluginContextMenuSnapshot();
       if (contextMenuSnapshot.length > 0) {
-        console.log(`[ContextMenu] Replaying ${contextMenuSnapshot.length} buffered context menu events`);
+        console.log(
+          `[ContextMenu] Replaying ${contextMenuSnapshot.length} buffered context menu events`,
+        );
         const { useContextMenuStore } = await import("./contextMenuStore");
         const contextMenuStore = useContextMenuStore();
         for (const event of contextMenuSnapshot) {
           contextMenuStore.handleContextMenuEvent({
-            action: (event.action === "register" ? "register" : "unregister"),
+            action: event.action === "register" ? "register" : "unregister",
             plugin_id: event.plugin_id,
             context: event.context,
             items: event.items,

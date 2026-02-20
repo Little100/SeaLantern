@@ -6,14 +6,7 @@ export interface PluginSettingOption {
 export interface PluginSettingField {
   key: string;
   label: string;
-  type:
-    | "string"
-    | "number"
-    | "boolean"
-    | "select"
-    | "textarea"
-    | "checkbox"
-    | "color";
+  type: "string" | "number" | "boolean" | "select" | "textarea" | "checkbox" | "color";
   display?: "button-group";
   default?: any;
   description?: string;
@@ -330,9 +323,7 @@ export const PERMISSION_METADATA: Record<string, PermissionMetadata> = {
   },
 };
 
-export function getPermissionMetadata(
-  permissionId: string,
-): PermissionMetadata {
+export function getPermissionMetadata(permissionId: string): PermissionMetadata {
   return (
     PERMISSION_METADATA[permissionId] || {
       id: permissionId,
@@ -366,23 +357,14 @@ export function groupPermissionsByDangerLevel(permissions: string[]): {
 export function hasDangerousPermissions(permissions: string[]): boolean {
   return permissions.some((perm) => {
     const metadata = getPermissionMetadata(perm);
-    return (
-      metadata.danger_level === "dangerous" ||
-      metadata.danger_level === "critical"
-    );
+    return metadata.danger_level === "dangerous" || metadata.danger_level === "critical";
   });
 }
 
-export function getLocalizedPluginName(
-  manifest: PluginManifest,
-  locale: string,
-): string {
+export function getLocalizedPluginName(manifest: PluginManifest, locale: string): string {
   return manifest.locales?.[locale]?.name ?? manifest.name;
 }
 
-export function getLocalizedPluginDescription(
-  manifest: PluginManifest,
-  locale: string,
-): string {
+export function getLocalizedPluginDescription(manifest: PluginManifest, locale: string): string {
   return manifest.locales?.[locale]?.description ?? manifest.description;
 }

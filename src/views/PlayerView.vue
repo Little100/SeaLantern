@@ -26,7 +26,8 @@ const consoleStore = useConsoleStore();
 
 const selectedServerId = ref("");
 const activeTab = ref<"online" | "whitelist" | "banned" | "ops">("online");
-const { indicatorRef: tabIndicator, updatePosition: updateTabIndicator } = useTabIndicator(activeTab);
+const { indicatorRef: tabIndicator, updatePosition: updateTabIndicator } =
+  useTabIndicator(activeTab);
 
 const whitelist = ref<PlayerEntry[]>([]);
 const bannedPlayers = ref<BanEntry[]>([]);
@@ -260,7 +261,6 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
   activeTab.value = tab;
   updateTabIndicator();
 }
-
 </script>
 
 <template>
@@ -344,7 +344,12 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
         </div>
         <div v-for="name in onlinePlayers" :key="name" class="player-item glass-card">
           <div class="player-avatar">
-            <img :src="'https://api.rms.net.cn/head/' + name" :alt="name" class="avatar-img" @error="(e) => (e.target as HTMLImageElement).style.display = 'none'" />
+            <img
+              :src="'https://api.rms.net.cn/head/' + name"
+              :alt="name"
+              class="avatar-img"
+              @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
           </div>
           <div class="player-info">
             <span class="player-name">{{ name }}</span>
@@ -362,7 +367,11 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
         </div>
         <div v-for="p in whitelist" :key="p.name" class="player-item glass-card">
           <div class="player-avatar">
-            <img :src="'https://api.rms.net.cn/head/' + p.name" class="avatar-img" @error="(e) => (e.target as HTMLImageElement).style.display = 'none'" />
+            <img
+              :src="'https://api.rms.net.cn/head/' + p.name"
+              class="avatar-img"
+              @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
           </div>
           <div class="player-info">
             <span class="player-name">{{ p.name }}</span>
@@ -386,7 +395,11 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
         </div>
         <div v-for="p in bannedPlayers" :key="p.name" class="player-item glass-card">
           <div class="player-avatar">
-            <img :src="'https://api.rms.net.cn/head/' + p.name" class="avatar-img" @error="(e) => (e.target as HTMLImageElement).style.display = 'none'" />
+            <img
+              :src="'https://api.rms.net.cn/head/' + p.name"
+              class="avatar-img"
+              @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
           </div>
           <div class="player-info">
             <span class="player-name">{{ p.name }}</span>
@@ -407,7 +420,11 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
         </div>
         <div v-for="p in ops" :key="p.name" class="player-item glass-card">
           <div class="player-avatar">
-            <img :src="'https://api.rms.net.cn/head/' + p.name" class="avatar-img" @error="(e) => (e.target as HTMLImageElement).style.display = 'none'" />
+            <img
+              :src="'https://api.rms.net.cn/head/' + p.name"
+              class="avatar-img"
+              @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
           </div>
           <div class="player-info">
             <span class="player-name">{{ p.name }}</span>
@@ -437,7 +454,10 @@ function selectTab(tab: "online" | "whitelist" | "banned" | "ops") {
           v-model="addBanReason"
         />
         <p v-if="!isRunning" class="text-error" style="font-size: 0.8125rem">
-          <AlertTriangle :size="14" style="display:inline;vertical-align:middle;margin-right:4px;" />服务器未运行，无法发送命令
+          <AlertTriangle
+            :size="14"
+            style="display: inline; vertical-align: middle; margin-right: 4px"
+          />服务器未运行，无法发送命令
         </p>
       </div>
       <template #footer>

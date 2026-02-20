@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown } from "lucide-vue-next";
 import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import SLCard from "../components/common/SLCard.vue";
 import SLButton from "../components/common/SLButton.vue";
@@ -17,7 +17,13 @@ import {
 } from "../api/settings";
 import { systemApi } from "../api/system";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { getAllThemes, getThemeById, getThemeOptions, mapLegacyPlanName, type ColorPlan } from "../themes";
+import {
+  getAllThemes,
+  getThemeById,
+  getThemeOptions,
+  mapLegacyPlanName,
+  type ColorPlan,
+} from "../themes";
 import { usePluginStore } from "../stores/pluginStore";
 
 const presetThemes = {
@@ -331,7 +337,7 @@ const pluginStore = usePluginStore();
 
 const themeProxyPlugin = computed(() => {
   return pluginStore.plugins.find(
-    p => p.state === "enabled" && pluginStore.hasCapability(p.manifest.id, "theme-provider")
+    (p) => p.state === "enabled" && pluginStore.hasCapability(p.manifest.id, "theme-provider"),
   );
 });
 
@@ -359,10 +365,7 @@ const backgroundSizeOptions = computed(() => [
 
 const colorOptions = computed(() => {
   const themes = getThemeOptions();
-  return [
-    ...themes,
-    { label: i18n.t("settings.color_options.custom"), value: "custom" },
-  ];
+  return [...themes, { label: i18n.t("settings.color_options.custom"), value: "custom" }];
 });
 
 const editColorOptions = computed(() => [
@@ -1462,8 +1465,13 @@ async function handleThemeChange() {
     const theme = getThemeById(settings.value.color);
     if (theme) {
       // 颜色方案映射
-      const colorPlans: Array<'light' | 'dark' | 'lightAcrylic' | 'darkAcrylic'> = ['light', 'dark', 'lightAcrylic', 'darkAcrylic'];
-      const legacyPlans = ['light', 'dark', 'light_acrylic', 'dark_acrylic'];
+      const colorPlans: Array<"light" | "dark" | "lightAcrylic" | "darkAcrylic"> = [
+        "light",
+        "dark",
+        "lightAcrylic",
+        "darkAcrylic",
+      ];
+      const legacyPlans = ["light", "dark", "light_acrylic", "dark_acrylic"];
 
       // 颜色类型映射
       const colorTypes = {
@@ -1727,7 +1735,9 @@ function clearBackgroundImage() {
           <div class="input-lg">
             <!-- 当被插件代理时显示提示 -->
             <div v-if="isThemeProxied" class="theme-proxied-notice">
-              <span class="proxied-text">{{ i18n.t("settings.theme_proxied_by", { plugin: themeProxyPluginName }) }}</span>
+              <span class="proxied-text">{{
+                i18n.t("settings.theme_proxied_by", { plugin: themeProxyPluginName })
+              }}</span>
             </div>
             <!-- 正常显示选择器 -->
             <SLSelect
@@ -1939,7 +1949,9 @@ function clearBackgroundImage() {
             <div class="input-lg">
               <!-- 当被插件代理时显示提示 -->
               <div v-if="isThemeProxied" class="theme-proxied-notice">
-                <span class="proxied-text">{{ i18n.t("settings.theme_proxied_by", { plugin: themeProxyPluginName }) }}</span>
+                <span class="proxied-text">{{
+                  i18n.t("settings.theme_proxied_by", { plugin: themeProxyPluginName })
+                }}</span>
               </div>
               <SLSelect
                 v-else

@@ -3,10 +3,7 @@ import { computed } from "vue";
 import SLModal from "../common/SLModal.vue";
 import SLButton from "../common/SLButton.vue";
 import { i18n } from "../../language";
-import {
-  type PermissionMetadata,
-  groupPermissionsByDangerLevel,
-} from "../../types/plugin";
+import { type PermissionMetadata, groupPermissionsByDangerLevel } from "../../types/plugin";
 import {
   AlertTriangle,
   Info,
@@ -55,9 +52,7 @@ const groupedPermissions = computed(() => {
   return groupPermissionsByDangerLevel(props.permissions);
 });
 
-const hasCritical = computed(
-  () => groupedPermissions.value.critical.length > 0,
-);
+const hasCritical = computed(() => groupedPermissions.value.critical.length > 0);
 
 function getPermissionName(perm: PermissionMetadata): string {
   return i18n.te(perm.name) ? i18n.t(perm.name) : perm.id;
@@ -87,19 +82,14 @@ function handleCancel() {
         <div class="header-text">
           <h2>{{ i18n.t("plugins.permission.warning_title") }}</h2>
           <p>
-            {{
-              i18n.t("plugins.permission.warning_message", { name: pluginName })
-            }}
+            {{ i18n.t("plugins.permission.warning_message", { name: pluginName }) }}
           </p>
         </div>
       </div>
 
       <div class="permission-list">
         <template
-          v-if="
-            groupedPermissions.critical.length > 0 ||
-            groupedPermissions.dangerous.length > 0
-          "
+          v-if="groupedPermissions.critical.length > 0 || groupedPermissions.dangerous.length > 0"
         >
           <div class="section-label danger-label">
             <span class="section-dot danger"></span>
@@ -107,10 +97,7 @@ function handleCancel() {
           </div>
           <div class="perm-row-list">
             <div
-              v-for="perm in [
-                ...groupedPermissions.critical,
-                ...groupedPermissions.dangerous,
-              ]"
+              v-for="perm in [...groupedPermissions.critical, ...groupedPermissions.dangerous]"
               :key="perm.id"
               class="perm-row danger"
               :title="getPermissionDesc(perm)"
@@ -155,10 +142,7 @@ function handleCancel() {
         <SLButton variant="secondary" @click="handleCancel">
           {{ i18n.t("plugins.permission.warning_cancel") }}
         </SLButton>
-        <SLButton
-          :variant="hasCritical ? 'danger' : 'primary'"
-          @click="handleConfirm"
-        >
+        <SLButton :variant="hasCritical ? 'danger' : 'primary'" @click="handleConfirm">
           {{ i18n.t("plugins.permission.warning_confirm") }}
         </SLButton>
       </div>

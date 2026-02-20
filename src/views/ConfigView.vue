@@ -48,7 +48,7 @@ const filteredEntries = computed(() => {
     const matchSearch =
       !searchQuery.value ||
       e.key.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (e.description ?? '').toLowerCase().includes(searchQuery.value.toLowerCase());
+      (e.description ?? "").toLowerCase().includes(searchQuery.value.toLowerCase());
     return matchCat && matchSearch;
   });
 });

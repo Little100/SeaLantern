@@ -45,13 +45,13 @@ function handleItemClick(item: ContextMenuItem) {
 <template>
   <Teleport to="body">
     <Transition name="context-menu-fade">
-      <div v-if="contextMenuStore.visible" class="sl-context-menu-backdrop" @click="contextMenuStore.hideContextMenu()" @contextmenu.prevent="contextMenuStore.hideContextMenu()">
-        <div
-          ref="menuRef"
-          class="sl-context-menu"
-          :style="menuStyle"
-          @click.stop
-        >
+      <div
+        v-if="contextMenuStore.visible"
+        class="sl-context-menu-backdrop"
+        @click="contextMenuStore.hideContextMenu()"
+        @contextmenu.prevent="contextMenuStore.hideContextMenu()"
+      >
+        <div ref="menuRef" class="sl-context-menu" :style="menuStyle" @click.stop>
           <div v-if="contextMenuStore.targetData" class="sl-context-menu-header">
             {{ contextMenuStore.targetData }}
           </div>
@@ -151,7 +151,9 @@ function handleItemClick(item: ContextMenuItem) {
 /* 淡入淡出动画 */
 .context-menu-fade-enter-active,
 .context-menu-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .context-menu-fade-enter-from,

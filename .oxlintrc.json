@@ -6,7 +6,7 @@
     "suspicious": "warn",
     "perf": "warn"
   },
-"rules": {
+  "rules": {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "off",
     "import/no-unused-modules": "off",

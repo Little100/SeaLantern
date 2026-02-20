@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { ref } from "vue";
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 interface Props {
   modelValue?: string;
@@ -27,16 +27,18 @@ const handleInput = (e: Event) => {
   emit("update:modelValue", (e.target as HTMLInputElement).value);
 };
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-input-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-input-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLInput',
-  get: (prop) => prop === 'value' ? props.modelValue : undefined,
-  set: (prop, value) => { if (prop === 'value') emit('update:modelValue', String(value ?? '')) },
+  type: "SLInput",
+  get: (prop) => (prop === "value" ? props.modelValue : undefined),
+  set: (prop, value) => {
+    if (prop === "value") emit("update:modelValue", String(value ?? ""));
+  },
   call: () => undefined,
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>

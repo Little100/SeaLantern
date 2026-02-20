@@ -4,13 +4,34 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import SLCard from "../components/common/SLCard.vue";
 import SLButton from "../components/common/SLButton.vue";
 import BrandIcon from "../components/common/BrandIcon.vue";
-import { contributors as contributorsList, type SocialLinks, type Contributor } from "../data/contributors";
+import {
+  contributors as contributorsList,
+  type SocialLinks,
+  type Contributor,
+} from "../data/contributors";
 import { checkUpdate, type UpdateInfo } from "../api/update";
 import { getAppVersion, BUILD_YEAR } from "../utils/version";
 import { i18n } from "../language";
-import { Link, Copy, Check, Plus, ArrowRight, AlertCircle, ExternalLink, RefreshCw, XCircle, Code, Feather, Lightbulb, BookOpen, Globe, Rocket, SquarePen } from "lucide-vue-next";
+import {
+  Link,
+  Copy,
+  Check,
+  Plus,
+  ArrowRight,
+  AlertCircle,
+  ExternalLink,
+  RefreshCw,
+  XCircle,
+  Code,
+  Feather,
+  Lightbulb,
+  BookOpen,
+  Globe,
+  Rocket,
+  SquarePen,
+} from "lucide-vue-next";
 
-const version = ref('Loading...');
+const version = ref("Loading...");
 const buildDate = BUILD_YEAR;
 
 const contributors = ref(contributorsList);
@@ -35,9 +56,14 @@ const updateInfo = ref<UpdateInfo | null>(null);
 const updateError = ref<string | null>(null);
 
 const showAurWindow = ref(false);
-const aurInfo = ref<{ currentVersion: string; latestVersion: string; helper: string; command: string } | null>(null);
+const aurInfo = ref<{
+  currentVersion: string;
+  latestVersion: string;
+  helper: string;
+  command: string;
+} | null>(null);
 
-const isAurUpdate = computed(() => updateInfo.value?.source === 'arch-aur');
+const isAurUpdate = computed(() => updateInfo.value?.source === "arch-aur");
 
 const copiedQQ = ref<string | null>(null);
 
@@ -46,7 +72,7 @@ onMounted(async () => {
 });
 
 function isSocialLinks(url: string | SocialLinks | undefined): url is SocialLinks {
-  return typeof url === 'object' && url !== null;
+  return typeof url === "object" && url !== null;
 }
 
 async function openLink(url: string) {
@@ -60,7 +86,7 @@ async function openLink(url: string) {
 }
 
 async function openSocialLink(platform: string, value: string) {
-  if (platform === 'qq') {
+  if (platform === "qq") {
     await copyQQ(value);
   } else {
     await openLink(value);
@@ -81,19 +107,20 @@ async function copyQQ(qq: string) {
 
 function getSocialTitle(platform: string): string {
   const titles: Record<string, string> = {
-    gitee: 'Gitee',
-    github: 'GitHub',
-    bilibili: 'Bilibili',
-    qq: 'QQ (点击复制)',
+    gitee: "Gitee",
+    github: "GitHub",
+    bilibili: "Bilibili",
+    qq: "QQ (点击复制)",
   };
   return titles[platform] || platform;
 }
 
 function getCustomLinks(links: SocialLinks): [string, string][] {
-  const predefined = ['gitee', 'github', 'bilibili', 'qq'];
-  return Object.entries(links).filter(
-    ([key, value]) => !predefined.includes(key) && value
-  ) as [string, string][];
+  const predefined = ["gitee", "github", "bilibili", "qq"];
+  return Object.entries(links).filter(([key, value]) => !predefined.includes(key) && value) as [
+    string,
+    string,
+  ][];
 }
 
 async function handleCheckUpdate() {
@@ -115,7 +142,7 @@ async function handleCheckUpdate() {
       };
     }
   } catch (error) {
-    console.error('[AboutView] 检查更新失败:', error);
+    console.error("[AboutView] 检查更新失败:", error);
     updateError.value = error as string;
   } finally {
     isCheckingUpdate.value = false;
@@ -128,7 +155,7 @@ async function handleManualDownload() {
     try {
       await openUrl(updateInfo.value.download_url);
     } catch (error) {
-      console.error('[AboutView] 打开链接失败:', error);
+      console.error("[AboutView] 打开链接失败:", error);
       alert(`打开链接失败: ${error}`);
     }
   }
@@ -150,7 +177,7 @@ async function handleManualDownload() {
         <span class="license-badge">GPLv3</span>
       </div>
       <p class="hero-desc">
-        一个由社区共同打造的 Minecraft 开服器。<br/>
+        一个由社区共同打造的 Minecraft 开服器。<br />
         不仅代码开源，连灵魂都由你们定义。
       </p>
     </div>
@@ -160,10 +187,11 @@ async function handleManualDownload() {
       <div class="manifesto">
         <h3 class="manifesto-title">为什么叫 Sea Lantern？</h3>
         <p class="manifesto-text">
-          海晶灯（Sea Lantern）是 Minecraft 中一种发光方块——它由无数碎片组合而成，却能发出柔和而持久的光。
+          海晶灯（Sea Lantern）是 Minecraft
+          中一种发光方块——它由无数碎片组合而成，却能发出柔和而持久的光。
         </p>
         <p class="manifesto-text">
-          就像这个项目一样，每一位贡献者都是一片海晶碎片。<br/>
+          就像这个项目一样，每一位贡献者都是一片海晶碎片。<br />
           当我们聚在一起，就能照亮整个社区。
         </p>
       </div>
@@ -171,7 +199,7 @@ async function handleManualDownload() {
 
     <!-- 此处缺一段代码 -->
     <!-- 点击加入开发 -->
-    
+
     <!-- Contributor Wall -->
     <div class="contributor-section">
       <div class="section-header">
@@ -180,24 +208,20 @@ async function handleManualDownload() {
       </div>
 
       <div class="contributor-grid">
-        <div
-          v-for="c in displayedContributors"
-          :key="c.name"
-          class="contributor-card glass-card"
-        >
+        <div v-for="c in displayedContributors" :key="c.name" class="contributor-card glass-card">
           <img :src="c.avatar" :alt="c.name" class="contributor-avatar" />
-          
+
           <div class="contributor-right">
             <div class="contributor-info" :title="c.name + ' - ' + c.role">
               <span class="contributor-name">{{ c.name }}</span>
               <span class="contributor-role">{{ c.role }}</span>
             </div>
-            
+
             <div v-if="c.url" class="contributor-social">
               <template v-if="!isSocialLinks(c.url)">
-                <a 
-                  :href="c.url" 
-                  target="_blank" 
+                <a
+                  :href="c.url"
+                  target="_blank"
                   rel="noopener noreferrer"
                   class="social-icon"
                   title="个人主页"
@@ -205,7 +229,7 @@ async function handleManualDownload() {
                   <Link :size="16" />
                 </a>
               </template>
-              
+
               <template v-else>
                 <a
                   v-if="c.url.gitee"
@@ -239,7 +263,7 @@ async function handleManualDownload() {
                 >
                   <BrandIcon name="bilibili" :size="16" />
                 </a>
-                
+
                 <button
                   v-if="c.url.qq"
                   @click="openSocialLink('qq', c.url.qq)"
@@ -250,12 +274,12 @@ async function handleManualDownload() {
                   <Check v-if="copiedQQ === c.url.qq" :size="16" />
                   <BrandIcon v-else name="qq" :size="16" />
                 </button>
-                
-                <a 
+
+                <a
                   v-for="[key, value] in getCustomLinks(c.url)"
                   :key="key"
-                  :href="value" 
-                  target="_blank" 
+                  :href="value"
+                  target="_blank"
                   rel="noopener noreferrer"
                   class="social-icon"
                   :title="key"
@@ -280,7 +304,7 @@ async function handleManualDownload() {
           </div>
         </div>
       </div>
-      
+
       <div v-if="hasMore" class="load-more-section">
         <SLButton variant="ghost" @click="loadMore">
           加载更多 ({{ contributors.length - displayedContributors.length }} 位)
@@ -358,7 +382,7 @@ async function handleManualDownload() {
               <span>已是最新版本</span>
             </div>
           </div>
-          
+
           <div v-if="updateError" class="update-error">
             <div class="error-icon">
               <XCircle :size="14" :stroke-width="2.5" />
@@ -436,22 +460,20 @@ async function handleManualDownload() {
       <SLButton variant="primary" size="lg" @click="openLink('https://github.com/FPSZ/SeaLantern')">
         Github 仓库
       </SLButton>
-      <SLButton variant="secondary" size="lg" @click="openLink('https://space.bilibili.com/3706927622130406?spm_id_from=333.1387.0.0')">
+      <SLButton
+        variant="secondary"
+        size="lg"
+        @click="openLink('https://space.bilibili.com/3706927622130406?spm_id_from=333.1387.0.0')"
+      >
         B站主页
       </SLButton>
     </div>
 
     <!-- Footer -->
     <div class="about-footer">
-      <p class="footer-text">
-        Sea Lantern 是一个开源项目，遵循 GPLv3 协议。
-      </p>
-      <p class="footer-text">
-        Minecraft 是 Mojang Studios 的注册商标。本项目与 Mojang 无关。
-      </p>
-      <p class="footer-quote">
-        "我们搭建了骨架，而灵魂，交给你们。"
-      </p>
+      <p class="footer-text">Sea Lantern 是一个开源项目，遵循 GPLv3 协议。</p>
+      <p class="footer-text">Minecraft 是 Mojang Studios 的注册商标。本项目与 Mojang 无关。</p>
+      <p class="footer-quote">"我们搭建了骨架，而灵魂，交给你们。"</p>
     </div>
   </div>
 </template>
@@ -503,7 +525,9 @@ async function handleManualDownload() {
   animation: sl-fade-in-up 0.6s ease 0.3s both;
 }
 
-.version-badge, .tech-badge, .license-badge {
+.version-badge,
+.tech-badge,
+.license-badge {
   padding: 4px 14px;
   border-radius: var(--sl-radius-full);
   font-size: 0.8125rem;
@@ -683,7 +707,9 @@ async function handleManualDownload() {
   border-bottom: 1px solid var(--sl-border-light);
 }
 
-.info-item:last-child { border-bottom: none; }
+.info-item:last-child {
+  border-bottom: none;
+}
 
 .info-label {
   font-size: 0.875rem;
@@ -904,9 +930,15 @@ async function handleManualDownload() {
 }
 
 @media (max-width: 768px) {
-  .info-grid { grid-template-columns: 1fr; }
-  .contribute-ways { grid-template-columns: 1fr; }
-  .contributor-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  .contribute-ways {
+    grid-template-columns: 1fr;
+  }
+  .contributor-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
 }
 
 .contributor-link {
@@ -914,7 +946,7 @@ async function handleManualDownload() {
   cursor: pointer;
   transition: all var(--sl-transition-normal);
   border-radius: var(--sl-radius-md);
-  line-height: 0;  
+  line-height: 0;
 }
 
 .contributor-link:hover {
@@ -975,5 +1007,4 @@ async function handleManualDownload() {
   justify-content: center;
   margin-top: var(--sl-space-lg);
 }
-
 </style>

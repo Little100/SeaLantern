@@ -62,7 +62,9 @@ const quickCommands = computed(() => [
           :title="cmd.command"
         >
           <span class="custom-btn-name">{{ cmd.name }}</span>
-          <span class="custom-btn-edit" @click.stop="emit('openEditCommandModal', cmd)"><Settings :size="14" /></span>
+          <span class="custom-btn-edit" @click.stop="emit('openEditCommandModal', cmd)"
+            ><Settings :size="14"
+          /></span>
         </div>
         <div
           class="custom-btn add-btn"

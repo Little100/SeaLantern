@@ -12,10 +12,7 @@ import SLCheckbox from "../components/common/SLCheckbox.vue";
 import { usePluginStore } from "../stores/pluginStore";
 import { i18n } from "../language";
 import type { PluginInfo, PluginSettingField } from "../types/plugin";
-import {
-  getLocalizedPluginName,
-  getLocalizedPluginDescription,
-} from "../types/plugin";
+import { getLocalizedPluginName, getLocalizedPluginDescription } from "../types/plugin";
 import { Palette, Puzzle } from "lucide-vue-next";
 
 const props = defineProps<{
@@ -31,9 +28,7 @@ const saving = ref(false);
 const loading = ref(true);
 
 const dependentPlugins = ref<PluginInfo[]>([]);
-const dependentSettingsForms = reactive<Record<string, Record<string, any>>>(
-  {},
-);
+const dependentSettingsForms = reactive<Record<string, Record<string, any>>>({});
 
 const sidebarConfig = computed(() => {
   return plugin.value?.manifest.sidebar;
@@ -47,17 +42,13 @@ const showDependents = computed(() => {
   return sidebarConfig.value?.show_dependents !== false;
 });
 
-function getDependencyId(
-  dep: string | { id: string; version?: string },
-): string {
+function getDependencyId(dep: string | { id: string; version?: string }): string {
   return typeof dep === "string" ? dep : dep.id;
 }
 
 async function loadPluginData() {
   loading.value = true;
-  const found = pluginStore.plugins.find(
-    (p) => p.manifest.id === props.pluginId,
-  );
+  const found = pluginStore.plugins.find((p) => p.manifest.id === props.pluginId);
   if (found) {
     plugin.value = found;
 
@@ -67,8 +58,7 @@ async function loadPluginData() {
     if (found.manifest.settings) {
       for (const field of found.manifest.settings) {
         if (settingsForm[field.key] === undefined) {
-          settingsForm[field.key] =
-            field.default ?? getDefaultValue(field.type);
+          settingsForm[field.key] = field.default ?? getDefaultValue(field.type);
         }
       }
     }
@@ -92,9 +82,7 @@ async function loadDependentPlugins() {
       ...(p.manifest.dependencies || []),
       ...(p.manifest.optional_dependencies || []),
     ];
-    const dependsOnCurrent = allDeps.some(
-      (dep) => getDependencyId(dep) === props.pluginId,
-    );
+    const dependsOnCurrent = allDeps.some((dep) => getDependencyId(dep) === props.pluginId);
 
     if (dependsOnCurrent && p.manifest.settings?.length) {
       deps.push(p);
@@ -137,9 +125,7 @@ const pluginPresets = computed(() => {
 });
 
 const isThemeProvider = computed(() => {
-  return (
-    plugin.value?.manifest.capabilities?.includes("theme-provider") ?? false
-  );
+  return plugin.value?.manifest.capabilities?.includes("theme-provider") ?? false;
 });
 
 async function applyPreset(presetKey: string) {
@@ -175,15 +161,8 @@ async function saveSettings() {
         await pluginStore.setPluginSettings(depPlugin.manifest.id, {
           ...depForm,
         });
-        if (
-          pluginStore.hasCapability(
-            depPlugin.manifest.id,
-            "theme-widgets-provider",
-          )
-        ) {
-          await pluginStore.applyThemeWidgetsProviderSettings(
-            depPlugin.manifest.id,
-          );
+        if (pluginStore.hasCapability(depPlugin.manifest.id, "theme-widgets-provider")) {
+          await pluginStore.applyThemeWidgetsProviderSettings(depPlugin.manifest.id);
         }
       }
     }
@@ -259,9 +238,7 @@ watch(
         <div class="header-info">
           <h1>{{ categoryLabel }}</h1>
           <p class="header-desc">
-            {{
-              getLocalizedPluginDescription(plugin.manifest, i18n.getLocale())
-            }}
+            {{ getLocalizedPluginDescription(plugin.manifest, i18n.getLocale()) }}
           </p>
         </div>
       </header>
@@ -286,17 +263,12 @@ watch(
                 :style="{ background: (presetData as any).accent_secondary }"
               ></span>
             </div>
-            <span class="preset-name">{{
-              (presetData as any).name ?? presetKey
-            }}</span>
+            <span class="preset-name">{{ (presetData as any).name ?? presetKey }}</span>
           </button>
         </div>
       </SLCard>
 
-      <SLCard
-        v-if="plugin.manifest.settings?.length"
-        class="settings-card main-settings"
-      >
+      <SLCard v-if="plugin.manifest.settings?.length" class="settings-card main-settings">
         <h3 class="section-title">{{ plugin.manifest.name }} 设置</h3>
         <div class="settings-form">
           <SLFormField
@@ -310,14 +282,8 @@ watch(
             </template>
             <template v-else-if="field.type === 'color'">
               <div class="color-row-inline">
-                <span class="color-row-value">{{
-                  settingsForm[field.key]
-                }}</span>
-                <input
-                  type="color"
-                  v-model="settingsForm[field.key]"
-                  class="color-row-picker"
-                />
+                <span class="color-row-value">{{ settingsForm[field.key] }}</span>
+                <input type="color" v-model="settingsForm[field.key]" class="color-row-picker" />
               </div>
             </template>
             <template v-else-if="field.type === 'textarea'">
@@ -340,11 +306,7 @@ watch(
             <template v-else-if="field.type === 'checkbox'">
               <SLCheckbox v-model="settingsForm[field.key]" />
             </template>
-            <template
-              v-else-if="
-                field.type === 'select' && field.display === 'button-group'
-              "
-            >
+            <template v-else-if="field.type === 'select' && field.display === 'button-group'">
               <div class="btn-group">
                 <button
                   v-for="opt in field.options"
@@ -358,10 +320,7 @@ watch(
               </div>
             </template>
             <template v-else-if="field.type === 'select'">
-              <SLSelect
-                v-model="settingsForm[field.key]"
-                :options="field.options || []"
-              />
+              <SLSelect v-model="settingsForm[field.key]" :options="field.options || []" />
             </template>
           </SLFormField>
         </div>
@@ -388,9 +347,7 @@ watch(
             <Puzzle v-else class="dependent-icon" :size="20" />
             <div class="dependent-info">
               <h3>{{ depPlugin.manifest.name }}</h3>
-              <span class="dependent-version"
-                >v{{ depPlugin.manifest.version }}</span
-              >
+              <span class="dependent-version">v{{ depPlugin.manifest.version }}</span>
             </div>
           </div>
           <div class="settings-form">
@@ -401,11 +358,7 @@ watch(
               :hint="field.description"
             >
               <template v-if="field.type === 'string'">
-                <SLInput
-                  v-model="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key]
-                  "
-                />
+                <SLInput v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]" />
               </template>
               <template v-else-if="field.type === 'color'">
                 <div class="color-row-inline">
@@ -414,18 +367,14 @@ watch(
                   }}</span>
                   <input
                     type="color"
-                    v-model="
-                      dependentSettingsForms[depPlugin.manifest.id][field.key]
-                    "
+                    v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]"
                     class="color-row-picker"
                   />
                 </div>
               </template>
               <template v-else-if="field.type === 'textarea'">
                 <SLTextarea
-                  v-model="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key]
-                  "
+                  v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]"
                   :rows="field.rows"
                   :maxlength="field.maxlength"
                 />
@@ -433,36 +382,19 @@ watch(
               <template v-else-if="field.type === 'number'">
                 <SLInput
                   type="number"
-                  :model-value="
-                    String(
-                      dependentSettingsForms[depPlugin.manifest.id][field.key],
-                    )
-                  "
+                  :model-value="String(dependentSettingsForms[depPlugin.manifest.id][field.key])"
                   @update:model-value="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key] =
-                      Number($event)
+                    dependentSettingsForms[depPlugin.manifest.id][field.key] = Number($event)
                   "
                 />
               </template>
               <template v-else-if="field.type === 'boolean'">
-                <SLSwitch
-                  v-model="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key]
-                  "
-                />
+                <SLSwitch v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]" />
               </template>
               <template v-else-if="field.type === 'checkbox'">
-                <SLCheckbox
-                  v-model="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key]
-                  "
-                />
+                <SLCheckbox v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]" />
               </template>
-              <template
-                v-else-if="
-                  field.type === 'select' && field.display === 'button-group'
-                "
-              >
+              <template v-else-if="field.type === 'select' && field.display === 'button-group'">
                 <div class="btn-group">
                   <button
                     v-for="opt in field.options"
@@ -470,14 +402,9 @@ watch(
                     class="btn-group-item"
                     :class="{
                       active:
-                        dependentSettingsForms[depPlugin.manifest.id][
-                          field.key
-                        ] === opt.value,
+                        dependentSettingsForms[depPlugin.manifest.id][field.key] === opt.value,
                     }"
-                    @click="
-                      dependentSettingsForms[depPlugin.manifest.id][field.key] =
-                        opt.value
-                    "
+                    @click="dependentSettingsForms[depPlugin.manifest.id][field.key] = opt.value"
                   >
                     {{ opt.label }}
                   </button>
@@ -485,9 +412,7 @@ watch(
               </template>
               <template v-else-if="field.type === 'select'">
                 <SLSelect
-                  v-model="
-                    dependentSettingsForms[depPlugin.manifest.id][field.key]
-                  "
+                  v-model="dependentSettingsForms[depPlugin.manifest.id][field.key]"
                   :options="field.options || []"
                 />
               </template>
@@ -497,12 +422,8 @@ watch(
       </template>
 
       <div class="action-buttons">
-        <SLButton variant="secondary" @click="resetToDefault"
-          >重置为默认</SLButton
-        >
-        <span class="auto-save-hint">{{
-          saving ? "保存中..." : "已自动保存"
-        }}</span>
+        <SLButton variant="secondary" @click="resetToDefault">重置为默认</SLButton>
+        <span class="auto-save-hint">{{ saving ? "保存中..." : "已自动保存" }}</span>
       </div>
     </template>
 

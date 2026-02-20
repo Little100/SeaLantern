@@ -11,9 +11,28 @@ import PluginPermissionPanel from "../components/plugin/PluginPermissionPanel.vu
 import SLPermissionDialog from "../components/plugin/SLPermissionDialog.vue";
 import { usePluginStore } from "../stores/pluginStore";
 import { i18n } from "../language";
-import type { PluginState, PluginInfo, MissingDependency, BatchInstallResult } from "../types/plugin";
-import { hasDangerousPermissions, getLocalizedPluginName, getLocalizedPluginDescription } from "../types/plugin";
-import { Upload, Layers, ShieldAlert, MoreVertical, Github, Settings, X, Trash2, Trash } from "lucide-vue-next";
+import type {
+  PluginState,
+  PluginInfo,
+  MissingDependency,
+  BatchInstallResult,
+} from "../types/plugin";
+import {
+  hasDangerousPermissions,
+  getLocalizedPluginName,
+  getLocalizedPluginDescription,
+} from "../types/plugin";
+import {
+  Upload,
+  Layers,
+  ShieldAlert,
+  MoreVertical,
+  Github,
+  Settings,
+  X,
+  Trash2,
+  Trash,
+} from "lucide-vue-next";
 
 const router = useRouter();
 const pluginStore = usePluginStore();
@@ -33,29 +52,23 @@ const filteredPlugins = computed(() => {
 const isInstalling = ref(false);
 let unlistenDragDrop: (() => void) | null = null;
 
-
 const showDependencyModal = ref(false);
 const missingDependencies = ref<MissingDependency[]>([]);
-const installedPluginName = ref('');
-
+const installedPluginName = ref("");
 
 const showSettingsModal = ref(false);
 const currentSettingsPlugin = ref<PluginInfo | null>(null);
 const settingsForm = reactive<Record<string, any>>({});
 const savingSettings = ref(false);
 
-
 const openMenuId = ref<string | null>(null);
 const checkingUpdate = ref<string | null>(null);
 const checkingAllUpdates = ref(false);
 
-
 const batchMode = ref(false);
 const selectedPlugins = ref<Set<string>>(new Set());
 
-
 const showBatchDeleteDialog = ref(false);
-
 
 const confirmDialog = ref<{
   show: boolean;
@@ -64,30 +77,26 @@ const confirmDialog = ref<{
   onConfirm: () => void | Promise<void>;
 }>({
   show: false,
-  title: '',
-  message: '',
+  title: "",
+  message: "",
   onConfirm: () => {},
 });
 
-
 const alertDialog = ref({
   show: false,
-  title: '',
-  message: '',
+  title: "",
+  message: "",
 });
-
 
 const showBatchResultModal = ref(false);
 const batchInstallResult = ref<BatchInstallResult | null>(null);
 
-
 const permissionWarning = ref({
   show: false,
-  pluginId: '',
-  pluginName: '',
+  pluginId: "",
+  pluginName: "",
   permissions: [] as string[],
 });
-
 
 function closeConfirmDialog() {
   confirmDialog.value.show = false;
@@ -95,9 +104,8 @@ function closeConfirmDialog() {
 
 function executeConfirmDialog() {
   const fn = confirmDialog.value.onConfirm;
-  if (fn) Promise.resolve(fn()).catch(e => console.error(e));
+  if (fn) Promise.resolve(fn()).catch((e) => console.error(e));
 }
-
 
 function showAlert(title: string, message: string) {
   alertDialog.value = {
@@ -107,21 +115,17 @@ function showAlert(title: string, message: string) {
   };
 }
 
-
 function closeAlertDialog() {
   alertDialog.value.show = false;
 }
 
 onMounted(async () => {
-  
   if (pluginStore.plugins.length === 0 && !pluginStore.loading) {
     pluginStore.loadPlugins();
   }
-  
-  
+
   document.addEventListener("click", handleClickOutside);
-  
-  
+
   unlistenDragDrop = await getCurrentWebview().onDragDropEvent(async (event) => {
     if (event.payload.type === "over") {
       isDragging.value = true;
@@ -129,9 +133,8 @@ onMounted(async () => {
       isDragging.value = false;
       const paths = event.payload.paths;
       if (paths && paths.length > 0) {
-        
         const validPaths = paths.filter(
-          (p) => p.endsWith(".zip") || p.endsWith("manifest.json") || !p.includes(".")
+          (p) => p.endsWith(".zip") || p.endsWith("manifest.json") || !p.includes("."),
         );
         if (validPaths.length > 0) {
           await handleBatchInstall(validPaths);
@@ -154,7 +157,7 @@ async function handleInstall(filePath: string) {
   isInstalling.value = true;
   try {
     const result = await pluginStore.installFromZip(filePath);
-    
+
     if (result.missing_dependencies && result.missing_dependencies.length > 0) {
       installedPluginName.value = result.plugin.manifest.name;
       missingDependencies.value = result.missing_dependencies;
@@ -169,11 +172,10 @@ async function handleInstall(filePath: string) {
 
 async function handleBatchInstall(paths: string[]) {
   if (paths.length === 1) {
-    
     await handleInstall(paths[0]);
     return;
   }
-  
+
   isInstalling.value = true;
   try {
     const result = await pluginStore.installBatch(paths);
@@ -194,7 +196,7 @@ async function handleSelectFile() {
       },
     ],
   });
-  
+
   if (selected) {
     const paths = Array.isArray(selected) ? selected : [selected];
     if (paths.length > 0) {
@@ -208,7 +210,7 @@ async function handleSelectFolder() {
     directory: true,
     multiple: true,
   });
-  
+
   if (selected) {
     const paths = Array.isArray(selected) ? selected : [selected];
     if (paths.length > 0) {
@@ -222,12 +224,10 @@ function handleRefresh() {
 }
 
 async function handleToggle(id: string, currentEnabled: boolean) {
-  
   pluginStore.error = null;
 
-  
   if (!currentEnabled) {
-    const plugin = pluginStore.plugins.find(p => p.manifest.id === id);
+    const plugin = pluginStore.plugins.find((p) => p.manifest.id === id);
     const permissions = plugin?.manifest.permissions || [];
     if (hasDangerousPermissions(permissions)) {
       permissionWarning.value = {
@@ -257,19 +257,17 @@ async function doTogglePlugin(id: string, enable: boolean) {
   const result = await pluginStore.togglePlugin(id, enable);
 
   if (!result.success && result.error) {
-    
     showAlert(i18n.t("plugins.enable_failed"), result.error);
   } else if (result.disabledPlugins && result.disabledPlugins.length > 0) {
-    
-    const plugin = pluginStore.plugins.find(p => p.manifest.id === id);
+    const plugin = pluginStore.plugins.find((p) => p.manifest.id === id);
     const pluginName = plugin?.manifest.name || id;
-    const disabledNames = result.disabledPlugins.map(depId => {
-      const dep = pluginStore.plugins.find(p => p.manifest.id === depId);
+    const disabledNames = result.disabledPlugins.map((depId) => {
+      const dep = pluginStore.plugins.find((p) => p.manifest.id === depId);
       return dep?.manifest.name || depId;
     });
     showAlert(
       i18n.t("plugins.plugin_disabled"),
-      i18n.t("plugins.plugin_disabled_desc", { name: pluginName, deps: disabledNames.join(', ') })
+      i18n.t("plugins.plugin_disabled_desc", { name: pluginName, deps: disabledNames.join(", ") }),
     );
   }
 }
@@ -315,7 +313,7 @@ function getPermissionLabel(perm: string): string {
 function getPermissionDesc(perm: string): string {
   return i18n.t(`plugins.permission.${perm}_desc`) !== `plugins.permission.${perm}_desc`
     ? i18n.t(`plugins.permission.${perm}_desc`)
-    : '';
+    : "";
 }
 
 function isPluginEnabled(state: PluginState): boolean {
@@ -326,23 +324,21 @@ function hasSettings(plugin: PluginInfo): boolean {
   return !!(plugin.manifest.settings && plugin.manifest.settings.length > 0);
 }
 
-
 function hasMissingRequiredDependencies(plugin: PluginInfo): boolean {
-  
   if (plugin.missing_dependencies) {
-    const stillMissing = plugin.missing_dependencies.filter(d => {
+    const stillMissing = plugin.missing_dependencies.filter((d) => {
       if (!d.required) return false;
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === d.id);
-      return !depPlugin || depPlugin.state !== 'enabled';
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === d.id);
+      return !depPlugin || depPlugin.state !== "enabled";
     });
     if (stillMissing.length > 0) return true;
   }
-  
+
   if (plugin.manifest.dependencies && plugin.manifest.dependencies.length > 0) {
     for (const dep of plugin.manifest.dependencies) {
-      const depId = typeof dep === 'string' ? dep : dep.id;
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-      if (!depPlugin || depPlugin.state !== 'enabled') {
+      const depId = typeof dep === "string" ? dep : dep.id;
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+      if (!depPlugin || depPlugin.state !== "enabled") {
         return true;
       }
     }
@@ -350,26 +346,25 @@ function hasMissingRequiredDependencies(plugin: PluginInfo): boolean {
   return false;
 }
 
-
 function getMissingRequiredDependencies(plugin: PluginInfo): MissingDependency[] {
   const missing: MissingDependency[] = [];
-  
+
   if (plugin.missing_dependencies) {
-    for (const d of plugin.missing_dependencies.filter(d => d.required)) {
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === d.id);
-      if (!depPlugin || depPlugin.state !== 'enabled') {
+    for (const d of plugin.missing_dependencies.filter((d) => d.required)) {
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === d.id);
+      if (!depPlugin || depPlugin.state !== "enabled") {
         missing.push(d);
       }
     }
   }
-  
+
   if (plugin.manifest.dependencies) {
     for (const dep of plugin.manifest.dependencies) {
-      const depId = typeof dep === 'string' ? dep : dep.id;
-      
-      if (missing.some(m => m.id === depId)) continue;
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-      if (!depPlugin || depPlugin.state !== 'enabled') {
+      const depId = typeof dep === "string" ? dep : dep.id;
+
+      if (missing.some((m) => m.id === depId)) continue;
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+      if (!depPlugin || depPlugin.state !== "enabled") {
         missing.push({ id: depId, required: true });
       }
     }
@@ -377,26 +372,25 @@ function getMissingRequiredDependencies(plugin: PluginInfo): MissingDependency[]
   return missing;
 }
 
-
 function getMissingOptionalDependencies(plugin: PluginInfo): MissingDependency[] {
   const missing: MissingDependency[] = [];
-  
+
   if (plugin.missing_dependencies) {
-    for (const d of plugin.missing_dependencies.filter(d => !d.required)) {
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === d.id);
-      if (!depPlugin || depPlugin.state !== 'enabled') {
+    for (const d of plugin.missing_dependencies.filter((d) => !d.required)) {
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === d.id);
+      if (!depPlugin || depPlugin.state !== "enabled") {
         missing.push(d);
       }
     }
   }
-  
+
   if (plugin.manifest.optional_dependencies) {
     for (const dep of plugin.manifest.optional_dependencies) {
-      const depId = typeof dep === 'string' ? dep : dep.id;
-      
-      if (missing.some(m => m.id === depId)) continue;
-      const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-      if (!depPlugin || depPlugin.state !== 'enabled') {
+      const depId = typeof dep === "string" ? dep : dep.id;
+
+      if (missing.some((m) => m.id === depId)) continue;
+      const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+      if (!depPlugin || depPlugin.state !== "enabled") {
         missing.push({ id: depId, required: false });
       }
     }
@@ -404,29 +398,26 @@ function getMissingOptionalDependencies(plugin: PluginInfo): MissingDependency[]
   return missing;
 }
 
-
 function hasMissingOptionalDependencies(plugin: PluginInfo): boolean {
   return getMissingOptionalDependencies(plugin).length > 0;
 }
-
 
 function getDependencyTooltip(plugin: PluginInfo): string {
   const requiredMissing = getMissingRequiredDependencies(plugin);
   const optionalMissing = getMissingOptionalDependencies(plugin);
   const parts: string[] = [];
-  
+
   if (requiredMissing.length > 0) {
-    const names = requiredMissing.map(d => getDepDisplayName(d.id)).join(', ');
+    const names = requiredMissing.map((d) => getDepDisplayName(d.id)).join(", ");
     parts.push(i18n.t("plugins.dep_tooltip.required", { names }));
   }
   if (optionalMissing.length > 0) {
-    const names = optionalMissing.map(d => getDepDisplayName(d.id)).join(', ');
+    const names = optionalMissing.map((d) => getDepDisplayName(d.id)).join(", ");
     parts.push(i18n.t("plugins.dep_tooltip.optional", { names }));
   }
-  
-  return parts.join('\n');
-}
 
+  return parts.join("\n");
+}
 
 function showMissingDependenciesModal(plugin: PluginInfo) {
   installedPluginName.value = plugin.manifest.name;
@@ -436,56 +427,51 @@ function showMissingDependenciesModal(plugin: PluginInfo) {
   showDependencyModal.value = true;
 }
 
-
 function getDepDisplayName(depId: string): string {
-  const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
+  const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
   return depPlugin ? depPlugin.manifest.name : depId;
 }
 
-
 function getDepStatus(depId: string): string {
-  const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-  if (!depPlugin) return 'not-installed';
-  if (depPlugin.state !== 'enabled') return 'not-enabled';
-  return 'ok';
+  const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+  if (!depPlugin) return "not-installed";
+  if (depPlugin.state !== "enabled") return "not-enabled";
+  return "ok";
 }
-
 
 function getDepStatusLabel(depId: string): string {
-  const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
+  const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
   if (!depPlugin) return i18n.t("plugins.dep_status.not_installed");
-  if (depPlugin.state !== 'enabled') return i18n.t("plugins.dep_status.disabled");
+  if (depPlugin.state !== "enabled") return i18n.t("plugins.dep_status.disabled");
   return i18n.t("plugins.dep_status.enabled");
 }
-
 
 interface DependencyDetail {
   id: string;
   name: string;
   version?: string;
-  status: 'enabled' | 'disabled' | 'not-installed';
+  status: "enabled" | "disabled" | "not-installed";
   statusLabel: string;
 }
-
 
 function getDependencyDetails(plugin: PluginInfo): DependencyDetail[] {
   if (!plugin.manifest.dependencies || plugin.manifest.dependencies.length === 0) {
     return [];
   }
-  return plugin.manifest.dependencies.map(dep => {
-    const depId = typeof dep === 'string' ? dep : dep.id;
-    const version = typeof dep === 'object' ? dep.version : undefined;
-    const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-    let status: 'enabled' | 'disabled' | 'not-installed';
+  return plugin.manifest.dependencies.map((dep) => {
+    const depId = typeof dep === "string" ? dep : dep.id;
+    const version = typeof dep === "object" ? dep.version : undefined;
+    const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+    let status: "enabled" | "disabled" | "not-installed";
     let statusLabel: string;
     if (!depPlugin) {
-      status = 'not-installed';
+      status = "not-installed";
       statusLabel = i18n.t("plugins.dep_status.not_installed");
-    } else if (depPlugin.state !== 'enabled') {
-      status = 'disabled';
+    } else if (depPlugin.state !== "enabled") {
+      status = "disabled";
       statusLabel = i18n.t("plugins.dep_status.installed_not_enabled");
     } else {
-      status = 'enabled';
+      status = "enabled";
       statusLabel = i18n.t("plugins.dep_status.enabled");
     }
     return {
@@ -493,30 +479,32 @@ function getDependencyDetails(plugin: PluginInfo): DependencyDetail[] {
       name: depPlugin?.manifest.name || depId,
       version,
       status,
-      statusLabel
+      statusLabel,
     };
   });
 }
-
 
 function getOptionalDependencyDetails(plugin: PluginInfo): DependencyDetail[] {
-  if (!plugin.manifest.optional_dependencies || plugin.manifest.optional_dependencies.length === 0) {
+  if (
+    !plugin.manifest.optional_dependencies ||
+    plugin.manifest.optional_dependencies.length === 0
+  ) {
     return [];
   }
-  return plugin.manifest.optional_dependencies.map(dep => {
-    const depId = typeof dep === 'string' ? dep : dep.id;
-    const version = typeof dep === 'object' ? dep.version : undefined;
-    const depPlugin = pluginStore.plugins.find(p => p.manifest.id === depId);
-    let status: 'enabled' | 'disabled' | 'not-installed';
+  return plugin.manifest.optional_dependencies.map((dep) => {
+    const depId = typeof dep === "string" ? dep : dep.id;
+    const version = typeof dep === "object" ? dep.version : undefined;
+    const depPlugin = pluginStore.plugins.find((p) => p.manifest.id === depId);
+    let status: "enabled" | "disabled" | "not-installed";
     let statusLabel: string;
     if (!depPlugin) {
-      status = 'not-installed';
+      status = "not-installed";
       statusLabel = i18n.t("plugins.dep_status.not_installed");
-    } else if (depPlugin.state !== 'enabled') {
-      status = 'disabled';
+    } else if (depPlugin.state !== "enabled") {
+      status = "disabled";
       statusLabel = i18n.t("plugins.dep_status.installed_not_enabled");
     } else {
-      status = 'enabled';
+      status = "enabled";
       statusLabel = i18n.t("plugins.dep_status.enabled");
     }
     return {
@@ -524,11 +512,10 @@ function getOptionalDependencyDetails(plugin: PluginInfo): DependencyDetail[] {
       name: depPlugin?.manifest.name || depId,
       version,
       status,
-      statusLabel
+      statusLabel,
     };
   });
 }
-
 
 interface DependentPlugin {
   id: string;
@@ -536,55 +523,53 @@ interface DependentPlugin {
   required: boolean;
 }
 
-
 function getDependentPlugins(plugin: PluginInfo): DependentPlugin[] {
   const dependents: DependentPlugin[] = [];
   const pluginId = plugin.manifest.id;
-  
+
   for (const p of pluginStore.plugins) {
     if (p.manifest.id === pluginId) continue;
-    
-    
+
     if (p.manifest.dependencies) {
       for (const dep of p.manifest.dependencies) {
-        const depId = typeof dep === 'string' ? dep : dep.id;
+        const depId = typeof dep === "string" ? dep : dep.id;
         if (depId === pluginId) {
           dependents.push({
             id: p.manifest.id,
             name: p.manifest.name,
-            required: true
+            required: true,
           });
           break;
         }
       }
     }
-    
-    
-    if (!dependents.find(d => d.id === p.manifest.id) && p.manifest.optional_dependencies) {
+
+    if (!dependents.find((d) => d.id === p.manifest.id) && p.manifest.optional_dependencies) {
       for (const dep of p.manifest.optional_dependencies) {
-        const depId = typeof dep === 'string' ? dep : dep.id;
+        const depId = typeof dep === "string" ? dep : dep.id;
         if (depId === pluginId) {
           dependents.push({
             id: p.manifest.id,
             name: p.manifest.name,
-            required: false
+            required: false,
           });
           break;
         }
       }
     }
   }
-  
+
   return dependents;
 }
 
 async function openSettings(plugin: PluginInfo) {
   currentSettingsPlugin.value = plugin;
   const savedSettings = await pluginStore.getPluginSettings(plugin.manifest.id);
-  Object.keys(settingsForm).forEach(key => delete settingsForm[key]);
+  Object.keys(settingsForm).forEach((key) => delete settingsForm[key]);
   if (plugin.manifest.settings) {
     for (const field of plugin.manifest.settings) {
-      settingsForm[field.key] = savedSettings[field.key] ?? field.default ?? getDefaultValue(field.type);
+      settingsForm[field.key] =
+        savedSettings[field.key] ?? field.default ?? getDefaultValue(field.type);
     }
   }
   showSettingsModal.value = true;
@@ -592,10 +577,14 @@ async function openSettings(plugin: PluginInfo) {
 
 function getDefaultValue(type: string): any {
   switch (type) {
-    case 'boolean': return false;
-    case 'number': return 0;
-    case 'select': return '';
-    default: return '';
+    case "boolean":
+      return false;
+    case "number":
+      return 0;
+    case "select":
+      return "";
+    default:
+      return "";
   }
 }
 
@@ -608,8 +597,10 @@ async function saveSettings() {
   if (!currentSettingsPlugin.value) return;
   savingSettings.value = true;
   try {
-    await pluginStore.setPluginSettings(currentSettingsPlugin.value.manifest.id, { ...settingsForm });
-    
+    await pluginStore.setPluginSettings(currentSettingsPlugin.value.manifest.id, {
+      ...settingsForm,
+    });
+
     if (pluginStore.isThemePalettePlugin(currentSettingsPlugin.value.manifest.id)) {
       await pluginStore.applyThemeSettings(currentSettingsPlugin.value.manifest.id);
     }
@@ -618,7 +609,6 @@ async function saveSettings() {
     savingSettings.value = false;
   }
 }
-
 
 function toggleMenu(pluginId: string) {
   if (openMenuId.value === pluginId) {
@@ -640,7 +630,7 @@ async function handleCheckUpdate(pluginId: string) {
     if (update) {
       showAlert(
         i18n.t("plugins.new_version_found"),
-        `${i18n.t("plugins.latest_version")}: ${update.latest_version}\n${i18n.t("plugins.current_version")}: ${update.current_version}`
+        `${i18n.t("plugins.latest_version")}: ${update.latest_version}\n${i18n.t("plugins.current_version")}: ${update.current_version}`,
       );
     } else {
       showAlert(i18n.t("plugins.check_update"), i18n.t("plugins.already_latest"));
@@ -650,7 +640,6 @@ async function handleCheckUpdate(pluginId: string) {
   }
 }
 
-
 const pendingDeletePluginId = ref<string | null>(null);
 const showSingleDeleteDialog = ref(false);
 const singleDeletePluginName = ref("");
@@ -658,7 +647,7 @@ const singleDeletePluginName = ref("");
 async function handleDelete(pluginId: string) {
   openMenuId.value = null;
 
-  const plugin = pluginStore.plugins.find(p => p.manifest.id === pluginId);
+  const plugin = pluginStore.plugins.find((p) => p.manifest.id === pluginId);
   if (plugin?.state === "enabled") {
     showAlert(i18n.t("plugins.cannot_delete_enabled"), plugin.manifest.name);
     return;
@@ -681,7 +670,6 @@ async function executeSingleDelete(deleteData: boolean) {
   }
 }
 
-
 function toggleBatchMode() {
   batchMode.value = !batchMode.value;
   if (!batchMode.value) {
@@ -690,27 +678,23 @@ function toggleBatchMode() {
   }
 }
 
-
 function togglePluginSelection(pluginId: string) {
   if (selectedPlugins.value.has(pluginId)) {
     selectedPlugins.value.delete(pluginId);
   } else {
     selectedPlugins.value.add(pluginId);
   }
-  selectedPlugins.value = new Set(selectedPlugins.value); 
+  selectedPlugins.value = new Set(selectedPlugins.value);
 }
-
 
 function selectAll() {
-  selectedPlugins.value = new Set(pluginStore.plugins.map(p => p.manifest.id));
+  selectedPlugins.value = new Set(pluginStore.plugins.map((p) => p.manifest.id));
 }
-
 
 function deselectAll() {
   selectedPlugins.value.clear();
   selectedPlugins.value = new Set(selectedPlugins.value);
 }
-
 
 function invertSelection() {
   const newSet = new Set<string>();
@@ -722,26 +706,24 @@ function invertSelection() {
   selectedPlugins.value = newSet;
 }
 
-
 function isAllSelected(): boolean {
-  return pluginStore.plugins.length > 0 && selectedPlugins.value.size === pluginStore.plugins.length;
+  return (
+    pluginStore.plugins.length > 0 && selectedPlugins.value.size === pluginStore.plugins.length
+  );
 }
-
 
 function showBatchDeleteConfirm() {
   showBatchDeleteDialog.value = true;
 }
 
-
 async function executeBatchDelete(deleteData: boolean) {
   showBatchDeleteDialog.value = false;
   const ids = Array.from(selectedPlugins.value);
 
-  
   const enabledNames = ids
-    .map(id => pluginStore.plugins.find(p => p.manifest.id === id))
-    .filter(p => p?.state === "enabled")
-    .map(p => p!.manifest.name);
+    .map((id) => pluginStore.plugins.find((p) => p.manifest.id === id))
+    .filter((p) => p?.state === "enabled")
+    .map((p) => p!.manifest.name);
   if (enabledNames.length > 0) {
     showAlert(i18n.t("plugins.cannot_delete_enabled"), enabledNames.join(", "));
     return;
@@ -761,7 +743,10 @@ async function handleCheckAllUpdates() {
   try {
     const updates = await pluginStore.checkAllUpdates();
     if (updates.length > 0) {
-      showAlert(i18n.t("plugins.check_update"), i18n.t("plugins.updates_available", { count: updates.length }));
+      showAlert(
+        i18n.t("plugins.check_update"),
+        i18n.t("plugins.updates_available", { count: updates.length }),
+      );
     } else {
       showAlert(i18n.t("plugins.check_update"), i18n.t("plugins.all_plugins_latest"));
     }
@@ -770,7 +755,6 @@ async function handleCheckAllUpdates() {
   }
 }
 
-
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement;
   if (!target.closest(".plugin-menu-wrapper")) {
@@ -778,21 +762,18 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
-
 function openRepository(url: string) {
   openUrl(url);
 }
 
-
 function goToMarket() {
   showDependencyModal.value = false;
-  router.push('/market');
+  router.push("/market");
 }
 </script>
 
 <template>
   <div class="plugins-view">
-    
     <div class="page-header">
       <div class="header-left">
         <h1 class="page-title">{{ i18n.t("plugins.title") }}</h1>
@@ -807,11 +788,7 @@ function goToMarket() {
         />
       </div>
       <div class="header-right">
-        <SLButton
-          :variant="batchMode ? 'primary' : 'secondary'"
-          size="sm"
-          @click="toggleBatchMode"
-        >
+        <SLButton :variant="batchMode ? 'primary' : 'secondary'" size="sm" @click="toggleBatchMode">
           {{ i18n.t("plugins.batch_mode") }}
         </SLButton>
         <SLButton
@@ -833,7 +810,6 @@ function goToMarket() {
       </div>
     </div>
 
-    
     <div
       class="upload-zone glass"
       :class="{ 'is-dragging': isDragging, 'is-installing': isInstalling }"
@@ -846,26 +822,30 @@ function goToMarket() {
         <Upload class="upload-icon" :size="32" :stroke-width="1.5" />
         <span class="upload-text">{{ i18n.t("plugins.drag_hint") }}</span>
         <div class="upload-buttons">
-          <SLButton variant="secondary" size="sm" @click="handleSelectFile">{{ i18n.t("plugins.select_file") }}</SLButton>
-          <SLButton variant="secondary" size="sm" @click="handleSelectFolder">{{ i18n.t("plugins.select_folder") }}</SLButton>
+          <SLButton variant="secondary" size="sm" @click="handleSelectFile">{{
+            i18n.t("plugins.select_file")
+          }}</SLButton>
+          <SLButton variant="secondary" size="sm" @click="handleSelectFolder">{{
+            i18n.t("plugins.select_folder")
+          }}</SLButton>
         </div>
       </div>
     </div>
 
-    
     <div v-if="pluginStore.error" class="error-banner glass">
       <span class="error-icon">!</span>
       <span class="error-text">{{ pluginStore.error }}</span>
     </div>
 
-    
     <div v-if="pluginStore.loading && pluginStore.plugins.length === 0" class="loading-state glass">
       <div class="loading-spinner"></div>
       <span class="loading-text">{{ i18n.t("plugins.loading_plugins") }}</span>
     </div>
 
-    
-    <div v-else-if="!pluginStore.loading && pluginStore.plugins.length === 0" class="empty-state glass">
+    <div
+      v-else-if="!pluginStore.loading && pluginStore.plugins.length === 0"
+      class="empty-state glass"
+    >
       <div class="empty-icon">
         <Layers :size="48" :stroke-width="1.5" />
       </div>
@@ -873,12 +853,12 @@ function goToMarket() {
       <p class="empty-desc">{{ i18n.t("plugins.no_plugins_desc") }}</p>
     </div>
 
-    
     <div v-else>
-      
       <div v-if="batchMode" class="batch-action-bar glass">
         <div class="batch-action-left">
-          <span class="selected-count">{{ i18n.t("plugins.selected_count", { count: selectedPlugins.size }) }}</span>
+          <span class="selected-count">{{
+            i18n.t("plugins.selected_count", { count: selectedPlugins.size })
+          }}</span>
         </div>
         <div class="batch-action-right">
           <SLButton variant="secondary" size="sm" @click="selectAll">
@@ -890,7 +870,12 @@ function goToMarket() {
           <SLButton variant="secondary" size="sm" @click="deselectAll">
             {{ i18n.t("plugins.deselect_all") }}
           </SLButton>
-          <SLButton variant="danger" size="sm" :disabled="selectedPlugins.size === 0" @click="showBatchDeleteConfirm">
+          <SLButton
+            variant="danger"
+            size="sm"
+            :disabled="selectedPlugins.size === 0"
+            @click="showBatchDeleteConfirm"
+          >
             {{ i18n.t("plugins.batch_delete") }}
           </SLButton>
         </div>
@@ -903,7 +888,6 @@ function goToMarket() {
           :class="{ 'plugin-card--selected': batchMode && selectedPlugins.has(plugin.manifest.id) }"
         >
           <div class="plugin-content">
-            
             <label v-if="batchMode" class="plugin-checkbox" @click.stop>
               <input
                 type="checkbox"
@@ -912,13 +896,16 @@ function goToMarket() {
               />
               <span class="checkbox-custom"></span>
             </label>
-            
+
             <div class="plugin-card-actions">
-              
-              <div v-if="pluginStore.updates[plugin.manifest.id]" class="update-badge" :title="i18n.t('plugins.update_available')">
+              <div
+                v-if="pluginStore.updates[plugin.manifest.id]"
+                class="update-badge"
+                :title="i18n.t('plugins.update_available')"
+              >
                 <ShieldAlert :size="12" />
               </div>
-              
+
               <div
                 v-if="hasMissingRequiredDependencies(plugin)"
                 class="dependency-indicator dependency-indicator--required"
@@ -931,21 +918,30 @@ function goToMarket() {
                 :title="getDependencyTooltip(plugin)"
                 @click.stop="showMissingDependenciesModal(plugin)"
               ></div>
-              
+
               <PluginPermissionPanel
                 :plugin-id="plugin.manifest.id"
                 :permissions="plugin.manifest.permissions || []"
               />
-              
+
               <div class="plugin-menu-wrapper">
                 <button class="plugin-menu-btn" @click.stop="toggleMenu(plugin.manifest.id)">
                   <MoreVertical :size="16" />
                 </button>
                 <div v-if="openMenuId === plugin.manifest.id" class="plugin-menu-dropdown">
-                  <button @click="handleCheckUpdate(plugin.manifest.id)" :disabled="checkingUpdate === plugin.manifest.id">
-                    {{ checkingUpdate === plugin.manifest.id ? i18n.t("plugins.checking") : i18n.t("plugins.menu.check_update") }}
+                  <button
+                    @click="handleCheckUpdate(plugin.manifest.id)"
+                    :disabled="checkingUpdate === plugin.manifest.id"
+                  >
+                    {{
+                      checkingUpdate === plugin.manifest.id
+                        ? i18n.t("plugins.checking")
+                        : i18n.t("plugins.menu.check_update")
+                    }}
                   </button>
-                  <button class="danger" @click="handleDelete(plugin.manifest.id)">{{ i18n.t("plugins.menu.delete") }}</button>
+                  <button class="danger" @click="handleDelete(plugin.manifest.id)">
+                    {{ i18n.t("plugins.menu.delete") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -962,7 +958,9 @@ function goToMarket() {
               <div class="plugin-info">
                 <div class="plugin-header">
                   <div class="plugin-title-row">
-                    <h3 class="plugin-name">{{ getLocalizedPluginName(plugin.manifest, i18n.getLocale()) }}</h3>
+                    <h3 class="plugin-name">
+                      {{ getLocalizedPluginName(plugin.manifest, i18n.getLocale()) }}
+                    </h3>
                     <span class="plugin-version">v{{ plugin.manifest.version }}</span>
                   </div>
                   <div class="plugin-author-row">
@@ -995,7 +993,11 @@ function goToMarket() {
               <span
                 class="plugin-status"
                 :style="{ color: getStatusColor(plugin.state) }"
-                :title="typeof plugin.state === 'object' && 'error' in plugin.state ? plugin.state.error : undefined"
+                :title="
+                  typeof plugin.state === 'object' && 'error' in plugin.state
+                    ? plugin.state.error
+                    : undefined
+                "
               >
                 {{ getStatusLabel(plugin.state) }}
               </span>
@@ -1010,13 +1012,22 @@ function goToMarket() {
                 </button>
                 <label
                   class="toggle-switch"
-                  :class="{ disabled: hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state) }"
-                  :title="hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state) ? i18n.t('plugins.missing_required_deps') : ''"
+                  :class="{
+                    disabled:
+                      hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state),
+                  }"
+                  :title="
+                    hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state)
+                      ? i18n.t('plugins.missing_required_deps')
+                      : ''
+                  "
                 >
                   <input
                     type="checkbox"
                     :checked="isPluginEnabled(plugin.state)"
-                    :disabled="hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state)"
+                    :disabled="
+                      hasMissingRequiredDependencies(plugin) && !isPluginEnabled(plugin.state)
+                    "
                     @click.prevent="handleToggle(plugin.manifest.id, isPluginEnabled(plugin.state))"
                   />
                   <span class="toggle-slider"></span>
@@ -1028,12 +1039,13 @@ function goToMarket() {
       </div>
     </div>
 
-    
     <Teleport to="body">
       <div v-if="showSettingsModal" class="modal-overlay" @click.self="closeSettings">
         <div class="settings-modal glass">
           <div class="modal-header">
-            <h2 class="modal-title">{{ i18n.t("plugins.settings_title", { name: currentSettingsPlugin?.manifest.name }) }}</h2>
+            <h2 class="modal-title">
+              {{ i18n.t("plugins.settings_title", { name: currentSettingsPlugin?.manifest.name }) }}
+            </h2>
             <button class="modal-close" @click="closeSettings">
               <X :size="20" />
             </button>
@@ -1055,7 +1067,11 @@ function goToMarket() {
                 class="setting-input"
               />
               <div v-else-if="field.type === 'color'" class="setting-color-field">
-                <input type="color" v-model="settingsForm[field.key]" class="setting-color-picker" />
+                <input
+                  type="color"
+                  v-model="settingsForm[field.key]"
+                  class="setting-color-picker"
+                />
                 <input type="text" v-model="settingsForm[field.key]" class="setting-input" />
               </div>
               <input
@@ -1079,9 +1095,7 @@ function goToMarket() {
               </select>
             </div>
 
-            
             <div class="plugin-details-section">
-              
               <div v-if="currentSettingsPlugin?.manifest.permissions?.length" class="detail-block">
                 <h4 class="detail-title">{{ i18n.t("plugins.permissions") }}</h4>
                 <div class="permission-tags">
@@ -1090,12 +1104,17 @@ function goToMarket() {
                     :key="perm"
                     class="permission-tag"
                     :title="getPermissionDesc(perm)"
-                  >{{ getPermissionLabel(perm) }}</span>
+                    >{{ getPermissionLabel(perm) }}</span
+                  >
                 </div>
               </div>
 
-              
-              <div v-if="currentSettingsPlugin && getDependencyDetails(currentSettingsPlugin).length > 0" class="detail-block">
+              <div
+                v-if="
+                  currentSettingsPlugin && getDependencyDetails(currentSettingsPlugin).length > 0
+                "
+                class="detail-block"
+              >
                 <h4 class="detail-title">{{ i18n.t("plugins.dependencies") }}</h4>
                 <ul class="dependency-list">
                   <li
@@ -1105,13 +1124,20 @@ function goToMarket() {
                   >
                     <span class="dep-name">{{ dep.name }}</span>
                     <span v-if="dep.version" class="dep-version">{{ dep.version }}</span>
-                    <span :class="['dep-status', `dep-status--${dep.status}`]">{{ dep.statusLabel }}</span>
+                    <span :class="['dep-status', `dep-status--${dep.status}`]">{{
+                      dep.statusLabel
+                    }}</span>
                   </li>
                 </ul>
               </div>
 
-              
-              <div v-if="currentSettingsPlugin && getOptionalDependencyDetails(currentSettingsPlugin).length > 0" class="detail-block">
+              <div
+                v-if="
+                  currentSettingsPlugin &&
+                  getOptionalDependencyDetails(currentSettingsPlugin).length > 0
+                "
+                class="detail-block"
+              >
                 <h4 class="detail-title">{{ i18n.t("plugins.optional_dependencies") }}</h4>
                 <ul class="dependency-list">
                   <li
@@ -1121,13 +1147,19 @@ function goToMarket() {
                   >
                     <span class="dep-name">{{ dep.name }}</span>
                     <span v-if="dep.version" class="dep-version">{{ dep.version }}</span>
-                    <span :class="['dep-status', `dep-status--${dep.status}`]">{{ dep.statusLabel }}</span>
+                    <span :class="['dep-status', `dep-status--${dep.status}`]">{{
+                      dep.statusLabel
+                    }}</span>
                   </li>
                 </ul>
               </div>
 
-              
-              <div v-if="currentSettingsPlugin && getDependentPlugins(currentSettingsPlugin).length > 0" class="detail-block">
+              <div
+                v-if="
+                  currentSettingsPlugin && getDependentPlugins(currentSettingsPlugin).length > 0
+                "
+                class="detail-block"
+              >
                 <h4 class="detail-title">{{ i18n.t("plugins.dependents") }}</h4>
                 <ul class="dependency-list">
                   <li
@@ -1136,8 +1168,17 @@ function goToMarket() {
                     class="dependency-item"
                   >
                     <span class="dep-name">{{ dep.name }}</span>
-                    <span :class="['dep-type-tag', dep.required ? 'dep-type-tag--required' : 'dep-type-tag--optional']">
-                      {{ dep.required ? i18n.t("plugins.dep_required") : i18n.t("plugins.dep_optional") }}
+                    <span
+                      :class="[
+                        'dep-type-tag',
+                        dep.required ? 'dep-type-tag--required' : 'dep-type-tag--optional',
+                      ]"
+                    >
+                      {{
+                        dep.required
+                          ? i18n.t("plugins.dep_required")
+                          : i18n.t("plugins.dep_optional")
+                      }}
                     </span>
                   </li>
                 </ul>
@@ -1145,34 +1186,38 @@ function goToMarket() {
             </div>
           </div>
           <div class="modal-footer">
-            <SLButton variant="secondary" size="sm" @click="closeSettings">{{ i18n.t("plugins.cancel") }}</SLButton>
-            <SLButton variant="primary" size="sm" :loading="savingSettings" @click="saveSettings">{{ i18n.t("plugins.save") }}</SLButton>
+            <SLButton variant="secondary" size="sm" @click="closeSettings">{{
+              i18n.t("plugins.cancel")
+            }}</SLButton>
+            <SLButton variant="primary" size="sm" :loading="savingSettings" @click="saveSettings">{{
+              i18n.t("plugins.save")
+            }}</SLButton>
           </div>
         </div>
       </div>
     </Teleport>
 
-    
-    <SLModal
-      :visible="confirmDialog.show"
-      :title="confirmDialog.title"
-      @close="closeConfirmDialog"
-    >
+    <SLModal :visible="confirmDialog.show" :title="confirmDialog.title" @close="closeConfirmDialog">
       <p class="dialog-message">{{ confirmDialog.message }}</p>
       <template #footer>
-        <SLButton variant="secondary" size="sm" @click="closeConfirmDialog">{{ i18n.t("plugins.cancel") }}</SLButton>
-        <SLButton variant="danger" size="sm" @click="executeConfirmDialog">{{ i18n.t("plugins.delete") }}</SLButton>
+        <SLButton variant="secondary" size="sm" @click="closeConfirmDialog">{{
+          i18n.t("plugins.cancel")
+        }}</SLButton>
+        <SLButton variant="danger" size="sm" @click="executeConfirmDialog">{{
+          i18n.t("plugins.delete")
+        }}</SLButton>
       </template>
     </SLModal>
 
-    
     <SLModal
       :visible="showSingleDeleteDialog"
       :title="i18n.t('plugins.confirm_delete')"
       @close="showSingleDeleteDialog = false"
     >
       <div class="batch-delete-dialog">
-        <p class="dialog-message">{{ i18n.t('plugins.confirm_delete_message', { name: singleDeletePluginName }) }}</p>
+        <p class="dialog-message">
+          {{ i18n.t("plugins.confirm_delete_message", { name: singleDeletePluginName }) }}
+        </p>
         <div class="batch-delete-options">
           <button class="batch-delete-option" @click="executeSingleDelete(true)">
             <Trash2 class="option-icon delete-with-data" :size="20" />
@@ -1185,18 +1230,21 @@ function goToMarket() {
         </div>
       </div>
       <template #footer>
-        <SLButton variant="secondary" size="sm" @click="showSingleDeleteDialog = false">{{ i18n.t("plugins.cancel") }}</SLButton>
+        <SLButton variant="secondary" size="sm" @click="showSingleDeleteDialog = false">{{
+          i18n.t("plugins.cancel")
+        }}</SLButton>
       </template>
     </SLModal>
 
-    
     <SLModal
       :visible="showBatchDeleteDialog"
       :title="i18n.t('plugins.confirm_batch_delete')"
       @close="showBatchDeleteDialog = false"
     >
       <div class="batch-delete-dialog">
-        <p class="dialog-message">{{ i18n.t('plugins.confirm_batch_delete_message', { count: selectedPlugins.size }) }}</p>
+        <p class="dialog-message">
+          {{ i18n.t("plugins.confirm_batch_delete_message", { count: selectedPlugins.size }) }}
+        </p>
         <div class="batch-delete-options">
           <button class="batch-delete-option" @click="executeBatchDelete(true)">
             <Trash2 class="option-icon delete-with-data" :size="20" />
@@ -1209,11 +1257,12 @@ function goToMarket() {
         </div>
       </div>
       <template #footer>
-        <SLButton variant="secondary" size="sm" @click="showBatchDeleteDialog = false">{{ i18n.t("plugins.cancel") }}</SLButton>
+        <SLButton variant="secondary" size="sm" @click="showBatchDeleteDialog = false">{{
+          i18n.t("plugins.cancel")
+        }}</SLButton>
       </template>
     </SLModal>
 
-    
     <SLModal
       :visible="alertDialog.show"
       :title="alertDialog.title"
@@ -1222,11 +1271,12 @@ function goToMarket() {
     >
       <p class="dialog-message">{{ alertDialog.message }}</p>
       <template #footer>
-        <SLButton variant="primary" size="sm" @click="closeAlertDialog">{{ i18n.t("plugins.ok") }}</SLButton>
+        <SLButton variant="primary" size="sm" @click="closeAlertDialog">{{
+          i18n.t("plugins.ok")
+        }}</SLButton>
       </template>
     </SLModal>
 
-    
     <SLPermissionDialog
       :show="permissionWarning.show"
       :plugin-name="permissionWarning.pluginName"
@@ -1235,7 +1285,6 @@ function goToMarket() {
       @cancel="cancelPermissionWarning"
     />
 
-    
     <SLModal
       :visible="showDependencyModal"
       :title="i18n.t('plugins.missing_deps_title')"
@@ -1248,7 +1297,9 @@ function goToMarket() {
         <ul class="dependency-list">
           <li v-for="dep in missingDependencies" :key="dep.id" class="dependency-item">
             <span class="dependency-name">{{ getDepDisplayName(dep.id) }}</span>
-            <span v-if="dep.version_requirement" class="dependency-version">{{ dep.version_requirement }}</span>
+            <span v-if="dep.version_requirement" class="dependency-version">{{
+              dep.version_requirement
+            }}</span>
             <span :class="['dependency-badge', dep.required ? 'required' : 'optional']">
               {{ dep.required ? i18n.t("plugins.dep_required") : i18n.t("plugins.dep_optional") }}
             </span>
@@ -1259,12 +1310,15 @@ function goToMarket() {
         </p>
       </div>
       <template #footer>
-        <SLButton variant="secondary" size="sm" @click="showDependencyModal = false">{{ i18n.t("plugins.later") }}</SLButton>
-        <SLButton variant="primary" size="sm" @click="goToMarket">{{ i18n.t("plugins.go_market") }}</SLButton>
+        <SLButton variant="secondary" size="sm" @click="showDependencyModal = false">{{
+          i18n.t("plugins.later")
+        }}</SLButton>
+        <SLButton variant="primary" size="sm" @click="goToMarket">{{
+          i18n.t("plugins.go_market")
+        }}</SLButton>
       </template>
     </SLModal>
 
-    
     <SLModal
       :visible="showBatchResultModal"
       :title="i18n.t('plugins.batch_result_title')"
@@ -1272,18 +1326,30 @@ function goToMarket() {
     >
       <div class="batch-result-dialog" v-if="batchInstallResult">
         <div v-if="batchInstallResult.success.length > 0" class="batch-success-section">
-          <p class="batch-section-title">{{ i18n.t("plugins.batch_success", { count: batchInstallResult.success.length }) }}</p>
+          <p class="batch-section-title">
+            {{ i18n.t("plugins.batch_success", { count: batchInstallResult.success.length }) }}
+          </p>
           <ul class="batch-list">
-            <li v-for="item in batchInstallResult.success" :key="item.plugin.manifest.id" class="batch-item success">
+            <li
+              v-for="item in batchInstallResult.success"
+              :key="item.plugin.manifest.id"
+              class="batch-item success"
+            >
               <span class="batch-item-name">{{ item.plugin.manifest.name }}</span>
               <span class="batch-item-version">v{{ item.plugin.manifest.version }}</span>
             </li>
           </ul>
         </div>
         <div v-if="batchInstallResult.failed.length > 0" class="batch-failed-section">
-          <p class="batch-section-title">{{ i18n.t("plugins.batch_failed", { count: batchInstallResult.failed.length }) }}</p>
+          <p class="batch-section-title">
+            {{ i18n.t("plugins.batch_failed", { count: batchInstallResult.failed.length }) }}
+          </p>
           <ul class="batch-list">
-            <li v-for="item in batchInstallResult.failed" :key="item.path" class="batch-item failed">
+            <li
+              v-for="item in batchInstallResult.failed"
+              :key="item.path"
+              class="batch-item failed"
+            >
               <span class="batch-item-path">{{ item.path.split(/[/\\]/).pop() }}</span>
               <span class="batch-item-error">{{ item.error }}</span>
             </li>
@@ -1291,7 +1357,9 @@ function goToMarket() {
         </div>
       </div>
       <template #footer>
-        <SLButton variant="primary" size="sm" @click="showBatchResultModal = false">{{ i18n.t("plugins.ok") }}</SLButton>
+        <SLButton variant="primary" size="sm" @click="showBatchResultModal = false">{{
+          i18n.t("plugins.ok")
+        }}</SLButton>
       </template>
     </SLModal>
   </div>
@@ -1304,7 +1372,6 @@ function goToMarket() {
   margin: 0 auto;
   font-family: var(--sl-font-sans);
 }
-
 
 .page-header {
   display: flex;
@@ -1347,7 +1414,6 @@ function goToMarket() {
 .plugin-search:focus {
   border-color: var(--color-primary);
 }
-
 
 .upload-zone {
   display: flex;
@@ -1406,7 +1472,6 @@ function goToMarket() {
   gap: 8px;
   margin-top: 12px;
 }
-
 
 .batch-result-dialog {
   display: flex;
@@ -1470,7 +1535,6 @@ function goToMarket() {
   font-size: 12px;
 }
 
-
 .error-banner {
   display: flex;
   align-items: center;
@@ -1499,7 +1563,6 @@ function goToMarket() {
   color: var(--color-danger);
   font-size: 14px;
 }
-
 
 .loading-state {
   display: flex;
@@ -1532,7 +1595,6 @@ function goToMarket() {
   font-size: 14px;
 }
 
-
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -1562,7 +1624,6 @@ function goToMarket() {
   max-width: 320px;
 }
 
-
 .plugin-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1576,7 +1637,9 @@ function goToMarket() {
 }
 
 .plugin-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   height: 100%;
 }
 
@@ -1588,7 +1651,6 @@ function goToMarket() {
   border-color: var(--sl-primary);
   box-shadow: 0 0 0 1px var(--sl-primary);
 }
-
 
 .batch-action-bar {
   display: flex;
@@ -1618,7 +1680,6 @@ function goToMarket() {
   font-weight: 500;
 }
 
-
 .plugin-checkbox {
   position: absolute;
   top: 8px;
@@ -1647,7 +1708,7 @@ function goToMarket() {
 }
 
 .plugin-checkbox .checkbox-custom::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 5px;
   top: 2px;
@@ -1671,7 +1732,6 @@ function goToMarket() {
 .plugin-checkbox:hover .checkbox-custom {
   border-color: var(--sl-primary);
 }
-
 
 .batch-delete-dialog {
   display: flex;
@@ -1884,7 +1944,6 @@ function goToMarket() {
   color: var(--sl-primary);
 }
 
-
 .toggle-switch {
   display: inline-flex;
   align-items: center;
@@ -1926,7 +1985,6 @@ function goToMarket() {
   transform: translateX(16px);
 }
 
-
 .toggle-switch.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -1939,7 +1997,6 @@ function goToMarket() {
 .toggle-switch.disabled .toggle-slider {
   cursor: not-allowed;
 }
-
 
 .modal-overlay {
   position: fixed;
@@ -2145,7 +2202,7 @@ function goToMarket() {
 }
 
 .setting-toggle .toggle-slider::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 3px;
   left: 3px;
@@ -2181,7 +2238,6 @@ function goToMarket() {
   border-top: 1px solid var(--sl-border);
 }
 
-
 .plugin-card-actions {
   position: absolute;
   top: 0;
@@ -2191,7 +2247,6 @@ function goToMarket() {
   gap: 4px;
   z-index: 10;
 }
-
 
 .plugin-menu-wrapper {
   position: relative;
@@ -2260,7 +2315,6 @@ function goToMarket() {
   background: rgba(239, 68, 68, 0.15);
 }
 
-
 .update-badge {
   display: flex;
   align-items: center;
@@ -2272,13 +2326,14 @@ function goToMarket() {
   color: white;
 }
 
-
 .dependency-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -2304,12 +2359,10 @@ function goToMarket() {
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
 }
 
-
 .header-right {
   display: flex;
   gap: 8px;
 }
-
 
 .dialog-message {
   margin: 0;
@@ -2318,7 +2371,6 @@ function goToMarket() {
   line-height: 1.6;
   white-space: pre-line;
 }
-
 
 .permission-warning-dialog {
   padding: 4px 0;
@@ -2375,7 +2427,6 @@ function goToMarket() {
   font-size: 12px;
   line-height: 1.5;
 }
-
 
 .dependency-dialog {
   padding: 4px 0;
@@ -2465,7 +2516,6 @@ function goToMarket() {
   line-height: 1.5;
 }
 
-
 .plugin-details-section {
   margin-top: 20px;
   padding-top: 16px;
@@ -2489,7 +2539,6 @@ function goToMarket() {
   letter-spacing: 0.5px;
 }
 
-
 .permission-tags {
   display: flex;
   flex-wrap: wrap;
@@ -2507,7 +2556,6 @@ function goToMarket() {
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 6px;
 }
-
 
 .dependency-list {
   list-style: none;
@@ -2563,7 +2611,6 @@ function goToMarket() {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
 }
-
 
 .dep-type-tag {
   padding: 2px 8px;

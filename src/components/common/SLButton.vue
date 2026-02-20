@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from "vue";
 import { Loader2 } from "lucide-vue-next";
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 interface Props {
   variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
@@ -18,16 +18,18 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
 });
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-button-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-button-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLButton',
-  get: (prop) => prop === 'disabled' ? props.disabled : undefined,
+  type: "SLButton",
+  get: (prop) => (prop === "disabled" ? props.disabled : undefined),
   set: () => {},
-  call: (method) => { if (method === 'click') elRef.value?.click() },
+  call: (method) => {
+    if (method === "click") elRef.value?.click();
+  },
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>
@@ -42,11 +44,7 @@ useRegisterComponent(id, {
     :disabled="disabled || loading"
     :aria-busy="loading"
   >
-    <Loader2
-      v-if="loading"
-      class="sl-button-spinner"
-      :size="16"
-    />
+    <Loader2 v-if="loading" class="sl-button-spinner" :size="16" />
     <slot />
   </button>
 </template>

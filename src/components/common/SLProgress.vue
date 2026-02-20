@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 interface Props {
   value: number;
@@ -17,16 +17,16 @@ const props = withDefaults(defineProps<Props>(), {
   variant: "primary",
 });
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-progress-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-progress-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLProgress',
-  get: (prop) => prop === 'value' ? props.value : undefined,
+  type: "SLProgress",
+  get: (prop) => (prop === "value" ? props.value : undefined),
   set: () => {},
   call: () => undefined,
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 
 // 计算属性 - 缓存计算结果，避免重复计算
 const percentage = computed(() => Math.min((props.value / props.max) * 100, 100));

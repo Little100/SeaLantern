@@ -27,7 +27,9 @@ const emit = defineEmits<{
 const logContainer = ref<HTMLElement | null>(null);
 
 function parseLogLine(line: string): ParsedLog {
-  const match = line.match(/^\[(\d{2}:\d{2}:\d{2})\] \[(.*?)\/(ERROR|INFO|WARN|DEBUG|FATAL)\]: (.*)$/);
+  const match = line.match(
+    /^\[(\d{2}:\d{2}:\d{2})\] \[(.*?)\/(ERROR|INFO|WARN|DEBUG|FATAL)\]: (.*)$/,
+  );
   if (match) {
     const [, time, source, level, message] = match;
     return { isParsed: true, time, source, level, message, raw: line };
@@ -35,7 +37,7 @@ function parseLogLine(line: string): ParsedLog {
   return { isParsed: false, raw: line };
 }
 
-const parsedLogs = computed(() => props.logs.map(line => parseLogLine(line)));
+const parsedLogs = computed(() => props.logs.map((line) => parseLogLine(line)));
 
 watch(
   () => props.logs.length,

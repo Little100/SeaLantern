@@ -11,7 +11,18 @@ import { serverApi } from "../api/server";
 import { systemApi, type SystemInfo } from "../api/system";
 import { i18n } from "../language";
 import type { ServerInstance } from "../types/server";
-import { Gauge, BarChart3, Server, MoreVertical, Pencil, Trash2, FolderOpen, Copy, Check, X } from "lucide-vue-next";
+import {
+  Gauge,
+  BarChart3,
+  Server,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  FolderOpen,
+  Copy,
+  Check,
+  X,
+} from "lucide-vue-next";
 
 const router = useRouter();
 const store = useServerStore();
@@ -869,7 +880,11 @@ function handleAnimationEnd(event: AnimationEvent) {
           >
             <p
               class="delete-confirm-message"
-              v-html="i18n.t('home.delete_confirm_message', { server: '<strong>' + server.name + '</strong>' })"
+              v-html="
+                i18n.t('home.delete_confirm_message', {
+                  server: '<strong>' + server.name + '</strong>',
+                })
+              "
             ></p>
             <div class="delete-input-group">
               <input

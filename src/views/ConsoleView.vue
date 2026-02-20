@@ -27,24 +27,14 @@ const suggestionIndex = ref(0);
 const commandHistory = ref<string[]>([]);
 const historyIndex = ref(-1);
 const consoleFontSize = ref(13);
-const {
-  loading: startLoading,
-  start: startStartLoading,
-  stop: stopStartLoading,
-} = useLoading();
-const {
-  loading: stopLoading,
-  start: startStopLoading,
-  stop: stopStopLoading,
-} = useLoading();
+const { loading: startLoading, start: startStartLoading, stop: stopStartLoading } = useLoading();
+const { loading: stopLoading, start: startStopLoading, stop: stopStopLoading } = useLoading();
 const isPolling = ref(false);
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 const showCommandModal = ref(false);
 const commandModalTitle = ref("");
-const editingCommand = ref<import("../types/server").ServerCommand | null>(
-  null,
-);
+const editingCommand = ref<import("../types/server").ServerCommand | null>(null);
 const commandName = ref("");
 const commandText = ref("");
 const commandLoading = ref(false);
@@ -109,18 +99,13 @@ const filteredSuggestions = computed(() => {
   const input = commandInput.value.trim().toLowerCase();
   if (!input) return [];
   return allCommands
-    .filter(
-      (c) => c.toLowerCase().startsWith(input) && c.toLowerCase() !== input,
-    )
+    .filter((c) => c.toLowerCase().startsWith(input) && c.toLowerCase() !== input)
     .slice(0, 8);
 });
 
 const serverId = computed(
   () =>
-    consoleStore.activeServerId ||
-    serverStore.currentServerId ||
-    (route.params.id as string) ||
-    "",
+    consoleStore.activeServerId || serverStore.currentServerId || (route.params.id as string) || "",
 );
 
 const currentLogs = computed(() => consoleStore.logs[serverId.value] || []);
@@ -132,9 +117,7 @@ const serverOptions = computed(() =>
   })),
 );
 
-const serverStatus = computed(
-  () => serverStore.statuses[serverId.value]?.status || "Stopped",
-);
+const serverStatus = computed(() => serverStore.statuses[serverId.value]?.status || "Stopped");
 
 const isRunning = computed(() => serverStatus.value === "Running");
 const isStopped = computed(() => serverStatus.value === "Stopped");
@@ -250,33 +233,25 @@ function handleKeydown(e: KeyboardEvent) {
   }
   if (e.key === "ArrowUp") {
     e.preventDefault();
-    if (showSuggestions.value && suggestionIndex.value > 0)
-      suggestionIndex.value--;
+    if (showSuggestions.value && suggestionIndex.value > 0) suggestionIndex.value--;
     else if (
       commandHistory.value.length > 0 &&
       historyIndex.value < commandHistory.value.length - 1
     ) {
       historyIndex.value++;
       commandInput.value =
-        commandHistory.value[
-          commandHistory.value.length - 1 - historyIndex.value
-        ];
+        commandHistory.value[commandHistory.value.length - 1 - historyIndex.value];
     }
     return;
   }
   if (e.key === "ArrowDown") {
     e.preventDefault();
-    if (
-      showSuggestions.value &&
-      suggestionIndex.value < filteredSuggestions.value.length - 1
-    )
+    if (showSuggestions.value && suggestionIndex.value < filteredSuggestions.value.length - 1)
       suggestionIndex.value++;
     else if (historyIndex.value > 0) {
       historyIndex.value--;
       commandInput.value =
-        commandHistory.value[
-          commandHistory.value.length - 1 - historyIndex.value
-        ];
+        commandHistory.value[commandHistory.value.length - 1 - historyIndex.value];
     } else {
       historyIndex.value = -1;
       commandInput.value = "";
@@ -289,16 +264,14 @@ function handleKeydown(e: KeyboardEvent) {
   }
   nextTick(() => {
     showSuggestions.value =
-      commandInput.value.trim().length > 0 &&
-      filteredSuggestions.value.length > 0;
+      commandInput.value.trim().length > 0 && filteredSuggestions.value.length > 0;
     suggestionIndex.value = 0;
   });
 }
 
 function doScroll() {
   nextTick(() => {
-    if (logContainer.value)
-      logContainer.value.scrollTop = logContainer.value.scrollHeight;
+    if (logContainer.value) logContainer.value.scrollTop = logContainer.value.scrollHeight;
   });
 }
 
@@ -348,10 +321,7 @@ async function exportLogs() {
       "[Sea Lantern] Logs copied to clipboard (" + logs.length + " lines)",
     );
   } catch (_e) {
-    consoleStore.appendLocal(
-      serverId.value,
-      "[Sea Lantern] Failed to copy logs",
-    );
+    consoleStore.appendLocal(serverId.value, "[Sea Lantern] Failed to copy logs");
   }
 }
 
@@ -436,12 +406,8 @@ function deleteCommand(_cmd: import("../types/server").ServerCommand) {
           @click="handleStop"
           >停止</SLButton
         >
-        <SLButton variant="secondary" size="sm" @click="exportLogs"
-          >复制日志</SLButton
-        >
-        <SLButton variant="ghost" size="sm" @click="handleClearLogs"
-          >清屏</SLButton
-        >
+        <SLButton variant="secondary" size="sm" @click="exportLogs">复制日志</SLButton>
+        <SLButton variant="ghost" size="sm" @click="handleClearLogs">清屏</SLButton>
       </div>
     </div>
 
@@ -478,10 +444,7 @@ function deleteCommand(_cmd: import("../types/server").ServerCommand) {
       />
 
       <!-- 控制台输入部分 -->
-      <ConsoleInput
-        :consoleFontSize="consoleFontSize"
-        @sendCommand="sendCommand"
-      />
+      <ConsoleInput :consoleFontSize="consoleFontSize" @sendCommand="sendCommand" />
 
       <!-- 自定义指令模态框 -->
       <CommandModal

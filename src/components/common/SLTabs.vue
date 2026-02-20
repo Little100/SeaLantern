@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { ref } from "vue";
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 export interface TabItem {
   key: string;
@@ -29,16 +29,18 @@ const handleTabClick = (tab: TabItem) => {
   }
 };
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-tabs-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-tabs-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLTabs',
-  get: (prop) => prop === 'value' ? props.modelValue : undefined,
-  set: (prop, value) => { if (prop === 'value') emit('update:modelValue', String(value)) },
+  type: "SLTabs",
+  get: (prop) => (prop === "value" ? props.modelValue : undefined),
+  set: (prop, value) => {
+    if (prop === "value") emit("update:modelValue", String(value));
+  },
   call: () => undefined,
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>

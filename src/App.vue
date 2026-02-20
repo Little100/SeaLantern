@@ -28,7 +28,7 @@ async function handleGlobalContextMenu(event: MouseEvent) {
   }
 
   const allElements = document.elementsFromPoint(event.clientX, event.clientY) as HTMLElement[];
-  const filteredElements = allElements.filter(el => !el.closest('.sl-context-menu-backdrop'));
+  const filteredElements = allElements.filter((el) => !el.closest(".sl-context-menu-backdrop"));
 
   let ctx = "global";
   let targetData = "";
@@ -76,7 +76,7 @@ onMounted(async () => {
   await pluginStore.initComponentEventListener();
   await pluginStore.initI18nEventListener();
 
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   try {
     await settingsStore.loadSettings();

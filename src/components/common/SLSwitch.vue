@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { ref } from "vue";
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 interface Props {
   modelValue?: boolean;
@@ -24,16 +24,22 @@ const handleClick = () => {
   }
 };
 
-const elRef = ref<HTMLElement | null>(null)
-const id = props.componentId ?? `sl-switch-${Math.random().toString(36).slice(2, 8)}`
+const elRef = ref<HTMLElement | null>(null);
+const id = props.componentId ?? `sl-switch-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLSwitch',
-  get: (prop) => prop === 'value' ? props.modelValue : undefined,
-  set: (prop, value) => { if (prop === 'value') emit('update:modelValue', !!value) },
+  type: "SLSwitch",
+  get: (prop) => (prop === "value" ? props.modelValue : undefined),
+  set: (prop, value) => {
+    if (prop === "value") emit("update:modelValue", !!value);
+  },
   call: () => undefined,
-  on: (event, cb) => { if (event === 'change') {} return () => {} },
+  on: (event, cb) => {
+    if (event === "change") {
+    }
+    return () => {};
+  },
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>

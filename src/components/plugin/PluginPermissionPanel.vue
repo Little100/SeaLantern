@@ -91,10 +91,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="permission-panel-wrapper"
-    :class="{ 'permission-panel-wrapper--open': isOpen }"
-  >
+  <div class="permission-panel-wrapper" :class="{ 'permission-panel-wrapper--open': isOpen }">
     <button
       ref="buttonRef"
       class="permission-btn"
@@ -103,12 +100,12 @@ onUnmounted(() => {
       :title="i18n.t('plugins.permission.panel_btn_title')"
     >
       <Lock :size="14" :stroke-width="2" />
-      <span class="permission-btn-text">{{ i18n.t('plugins.permission.panel_btn_text') }}</span>
+      <span class="permission-btn-text">{{ i18n.t("plugins.permission.panel_btn_text") }}</span>
     </button>
 
     <div v-if="isOpen" ref="panelRef" class="permission-panel glass">
       <div class="panel-header">
-        <span class="panel-title">{{ i18n.t('plugins.permission.panel_title') }}</span>
+        <span class="panel-title">{{ i18n.t("plugins.permission.panel_title") }}</span>
         <button class="panel-close" @click="closePanel">
           <X :size="14" :stroke-width="2" />
         </button>
@@ -116,7 +113,7 @@ onUnmounted(() => {
 
       <div class="panel-content">
         <div class="panel-section">
-          <div class="section-title">{{ i18n.t('plugins.permission.panel_declared') }}</div>
+          <div class="section-title">{{ i18n.t("plugins.permission.panel_declared") }}</div>
           <div class="permission-tags">
             <span
               v-for="perm in permissions"
@@ -125,46 +122,40 @@ onUnmounted(() => {
               :title="getPermissionDesc(perm)"
             >
               {{ getPermissionLabel(perm) }}
-              <span v-if="getPermissionDesc(perm)" class="permission-tag-tooltip">{{ getPermissionDesc(perm) }}</span>
+              <span v-if="getPermissionDesc(perm)" class="permission-tag-tooltip">{{
+                getPermissionDesc(perm)
+              }}</span>
             </span>
             <span v-if="permissions.length === 0" class="empty-hint">
-              {{ i18n.t('plugins.permission.panel_no_permissions') }}
+              {{ i18n.t("plugins.permission.panel_no_permissions") }}
             </span>
           </div>
         </div>
 
         <div class="panel-section">
-          <div class="section-title">{{ i18n.t('plugins.permission.panel_command_log') }}</div>
+          <div class="section-title">{{ i18n.t("plugins.permission.panel_command_log") }}</div>
           <div class="command-list">
-            <div
-              v-for="(log, index) in commandLogs"
-              :key="index"
-              class="command-item"
-            >
-              <span class="command-action" :title="log.detail">{{
-                log.action
-              }}</span>
+            <div v-for="(log, index) in commandLogs" :key="index" class="command-item">
+              <span class="command-action" :title="log.detail">{{ log.action }}</span>
               <span class="command-time">{{ formatTime(log.timestamp) }}</span>
             </div>
             <div v-if="commandLogs.length === 0" class="empty-hint">
-              {{ i18n.t('plugins.permission.panel_no_commands') }}
+              {{ i18n.t("plugins.permission.panel_no_commands") }}
             </div>
           </div>
         </div>
 
         <div class="panel-section">
-          <div class="section-title">{{ i18n.t('plugins.permission.panel_api_stats') }}</div>
+          <div class="section-title">{{ i18n.t("plugins.permission.panel_api_stats") }}</div>
           <div class="api-stats">
-            <div
-              v-for="stat in apiStats"
-              :key="stat.name"
-              class="api-stat-item"
-            >
+            <div v-for="stat in apiStats" :key="stat.name" class="api-stat-item">
               <span class="api-name">{{ stat.name }}</span>
-              <span class="api-count">{{ i18n.t('plugins.permission.panel_call_count', { count: stat.count }) }}</span>
+              <span class="api-count">{{
+                i18n.t("plugins.permission.panel_call_count", { count: stat.count })
+              }}</span>
             </div>
             <div v-if="apiStats.length === 0" class="empty-hint">
-              {{ i18n.t('plugins.permission.panel_no_api_calls') }}
+              {{ i18n.t("plugins.permission.panel_no_api_calls") }}
             </div>
           </div>
         </div>

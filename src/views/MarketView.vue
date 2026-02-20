@@ -2,14 +2,19 @@
 import { ref, computed, onMounted } from "vue";
 import { usePluginStore } from "../stores/pluginStore";
 import { useToast } from "../composables/useToast";
-import { fetchMarketPlugins, fetchMarketPluginDetail, fetchMarketCategories, installFromMarket } from "../api/plugin";
+import {
+  fetchMarketPlugins,
+  fetchMarketPluginDetail,
+  fetchMarketCategories,
+  installFromMarket,
+} from "../api/plugin";
 import type { MarketPluginInfo } from "../api/plugin";
 import { i18n } from "../language";
 import { RefreshCw, AlertCircle, Search, Puzzle, X, Globe } from "lucide-vue-next";
 
 type MarketPlugin = MarketPluginInfo & { _path?: string };
 
-const MARKET_BASE_URL = "https://sealantern-studio.needhelp.icu/"
+const MARKET_BASE_URL = "https://sealantern-studio.needhelp.icu/";
 const MARKET_URL_KEY = "sealantern_market_url";
 
 const pluginStore = usePluginStore();
@@ -28,9 +33,7 @@ const showUrlEditor = ref(false);
 const customMarketUrl = ref(localStorage.getItem(MARKET_URL_KEY) || "");
 const urlInput = ref(customMarketUrl.value);
 
-const activeMarketUrl = computed(() =>
-  customMarketUrl.value.trim() || MARKET_BASE_URL
-);
+const activeMarketUrl = computed(() => customMarketUrl.value.trim() || MARKET_BASE_URL);
 
 function saveMarketUrl() {
   const url = urlInput.value.trim();
@@ -56,39 +59,39 @@ const filteredPlugins = computed(() => {
   let result = marketPlugins.value;
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
-    result = result.filter(p =>
-      resolveI18n(p.name).toLowerCase().includes(q) ||
-      resolveI18n(p.description).toLowerCase().includes(q) ||
-      p.author?.name?.toLowerCase().includes(q)
+    result = result.filter(
+      (p) =>
+        resolveI18n(p.name).toLowerCase().includes(q) ||
+        resolveI18n(p.description).toLowerCase().includes(q) ||
+        p.author?.name?.toLowerCase().includes(q),
     );
   }
   if (selectedTag.value) {
-    result = result.filter(p => p.categories?.includes(selectedTag.value!));
+    result = result.filter((p) => p.categories?.includes(selectedTag.value!));
   }
   return result;
 });
 
 const allTags = computed(() => {
   const tags = new Set<string>();
-  marketPlugins.value.forEach(p => p.categories?.forEach(t => tags.add(t)));
+  marketPlugins.value.forEach((p) => p.categories?.forEach((t) => tags.add(t)));
   return Array.from(tags);
 });
 
-
 function resolveI18n(val: Record<string, string> | string | undefined): string {
-  if (!val) return '';
-  if (typeof val === 'string') return val;
-  const lang = navigator.language || 'zh-CN';
-  const key = lang.startsWith('zh') ? 'zh-CN' : 'en-US';
-  return val[key] || val['zh-CN'] || Object.values(val)[0] || '';
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  const lang = navigator.language || "zh-CN";
+  const key = lang.startsWith("zh") ? "zh-CN" : "en-US";
+  return val[key] || val["zh-CN"] || Object.values(val)[0] || "";
 }
 
 function isInstalled(pluginId: string): boolean {
-  return pluginStore.plugins.some(p => p.manifest.id === pluginId);
+  return pluginStore.plugins.some((p) => p.manifest.id === pluginId);
 }
 
 function isInstalledAndEnabled(pluginId: string): boolean {
-  const plugin = pluginStore.plugins.find(p => p.manifest.id === pluginId);
+  const plugin = pluginStore.plugins.find((p) => p.manifest.id === pluginId);
   return !!plugin && plugin.state === "enabled";
 }
 
@@ -99,13 +102,13 @@ function getInstallButtonText(pluginId: string): string {
   return i18n.t("market.install");
 }
 
-const CRITICAL_PERMS = new Set(['execute_program', 'plugin_folder_access']);
-const DANGEROUS_PERMS = new Set(['fs', 'network', 'server', 'console']);
+const CRITICAL_PERMS = new Set(["execute_program", "plugin_folder_access"]);
+const DANGEROUS_PERMS = new Set(["fs", "network", "server", "console"]);
 
-function getPermissionLevel(perm: string): 'critical' | 'dangerous' | 'normal' {
-  if (CRITICAL_PERMS.has(perm)) return 'critical';
-  if (DANGEROUS_PERMS.has(perm)) return 'dangerous';
-  return 'normal';
+function getPermissionLevel(perm: string): "critical" | "dangerous" | "normal" {
+  if (CRITICAL_PERMS.has(perm)) return "critical";
+  if (DANGEROUS_PERMS.has(perm)) return "dangerous";
+  return "normal";
 }
 
 function getPermissionLabel(perm: string): string {
@@ -117,29 +120,29 @@ function getPermissionLabel(perm: string): string {
 function getPermissionDesc(perm: string): string {
   return i18n.t(`plugins.permission.${perm}_desc`) !== `plugins.permission.${perm}_desc`
     ? i18n.t(`plugins.permission.${perm}_desc`)
-    : '';
+    : "";
 }
 
 function getCategoryLabel(key: string): string {
-  const lang = navigator.language || 'zh-CN';
-  const langKey = lang.startsWith('zh') ? 'zh-CN' : 'en-US';
+  const lang = navigator.language || "zh-CN";
+  const langKey = lang.startsWith("zh") ? "zh-CN" : "en-US";
   const cat = categories.value[key];
   if (!cat) return key;
-  if (typeof cat === 'string') return cat;
-  return cat[langKey] || cat['zh-CN'] || key;
+  if (typeof cat === "string") return cat;
+  return cat[langKey] || cat["zh-CN"] || key;
 }
 
 function getIconUrl(plugin: MarketPlugin): string | null {
   if (!plugin.icon_url || !plugin._path) return null;
-  const dir = plugin._path.replace(/\/[^/]+$/, '');
-  return `${activeMarketUrl.value.trim().replace(/\/$/, '')}/${dir}/${plugin.icon_url}`;
+  const dir = plugin._path.replace(/\/[^/]+$/, "");
+  return `${activeMarketUrl.value.trim().replace(/\/$/, "")}/${dir}/${plugin.icon_url}`;
 }
 
 async function loadMarket() {
   loading.value = true;
   error.value = null;
   try {
-    const url = activeMarketUrl.value.trim().replace(/\/$/, '');
+    const url = activeMarketUrl.value.trim().replace(/\/$/, "");
     const [plugins, cats] = await Promise.all([
       fetchMarketPlugins(url === MARKET_BASE_URL ? undefined : url),
       fetchMarketCategories(url === MARKET_BASE_URL ? undefined : url).catch(() => ({})),
@@ -294,13 +297,9 @@ onMounted(() => {
         <div class="card-info">
           <div class="card-header">
             <span class="card-name">{{ resolveI18n(plugin.name) }}</span>
-            <span class="card-version">{{
-              plugin.version ? "v" + plugin.version : ""
-            }}</span>
+            <span class="card-version">{{ plugin.version ? "v" + plugin.version : "" }}</span>
           </div>
-          <span class="card-author"
-            >by {{ plugin.author?.name || "Unknown" }}</span
-          >
+          <span class="card-author">by {{ plugin.author?.name || "Unknown" }}</span>
           <p class="card-desc">{{ resolveI18n(plugin.description) }}</p>
 
           <div v-if="plugin.dependencies?.length" class="card-deps">
@@ -309,12 +308,9 @@ onMounted(() => {
           </div>
           <div class="card-footer">
             <div class="card-tags">
-              <span
-                v-for="tag in plugin.categories?.slice(0, 2)"
-                :key="tag"
-                class="card-tag"
-                >{{ getCategoryLabel(tag) }}</span
-              >
+              <span v-for="tag in plugin.categories?.slice(0, 2)" :key="tag" class="card-tag">{{
+                getCategoryLabel(tag)
+              }}</span>
             </div>
             <button
               :class="[
@@ -326,9 +322,7 @@ onMounted(() => {
               ]"
               :disabled="isInstalled(plugin.id) || installing === plugin.id"
               :title="
-                isInstalledAndEnabled(plugin.id)
-                  ? i18n.t('market.plugin_running_warning')
-                  : ''
+                isInstalledAndEnabled(plugin.id) ? i18n.t('market.plugin_running_warning') : ''
               "
               @click.stop="handleInstall(plugin)"
             >
@@ -340,11 +334,7 @@ onMounted(() => {
     </div>
 
     <Teleport to="body">
-      <div
-        v-if="selectedPlugin"
-        class="modal-overlay"
-        @click.self="closeDetail"
-      >
+      <div v-if="selectedPlugin" class="modal-overlay" @click.self="closeDetail">
         <div class="detail-modal glass-strong">
           <button class="modal-close" @click="closeDetail">
             <X :size="20" />
@@ -363,9 +353,7 @@ onMounted(() => {
               <span class="detail-version">{{
                 selectedPlugin.version ? "v" + selectedPlugin.version : ""
               }}</span>
-              <span class="detail-author"
-                >by {{ selectedPlugin.author?.name }}</span
-              >
+              <span class="detail-author">by {{ selectedPlugin.author?.name }}</span>
             </div>
           </div>
           <div v-if="detailLoading" class="detail-loading">
@@ -373,25 +361,15 @@ onMounted(() => {
           </div>
           <div v-else class="detail-body">
             <p class="detail-desc">
-              {{
-                resolveI18n(
-                  pluginDetail?.description || selectedPlugin.description,
-                )
-              }}
+              {{ resolveI18n(pluginDetail?.description || selectedPlugin.description) }}
             </p>
-            <div
-              v-if="pluginDetail?.permissions?.length"
-              class="detail-section"
-            >
+            <div v-if="pluginDetail?.permissions?.length" class="detail-section">
               <h3>{{ i18n.t("market.permissions") }}</h3>
               <div class="permission-badges">
                 <span
                   v-for="perm in pluginDetail.permissions"
                   :key="perm"
-                  :class="[
-                    'perm-badge',
-                    `perm-badge--${getPermissionLevel(perm)}`,
-                  ]"
+                  :class="['perm-badge', `perm-badge--${getPermissionLevel(perm)}`]"
                   :title="getPermissionDesc(perm)"
                   >{{ getPermissionLabel(perm) }}</span
                 >
@@ -411,10 +389,7 @@ onMounted(() => {
                   'is-enabled': isInstalledAndEnabled(selectedPlugin.id),
                 },
               ]"
-              :disabled="
-                isInstalled(selectedPlugin.id) ||
-                installing === selectedPlugin.id
-              "
+              :disabled="isInstalled(selectedPlugin.id) || installing === selectedPlugin.id"
               :title="
                 isInstalledAndEnabled(selectedPlugin.id)
                   ? i18n.t('market.plugin_running_warning')

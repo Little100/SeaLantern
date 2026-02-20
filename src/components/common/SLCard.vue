@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import DOMPurify from 'dompurify'
-import { useRegisterComponent } from '../../composables/useRegisterComponent'
+import { ref } from "vue";
+import DOMPurify from "dompurify";
+import { useRegisterComponent } from "../../composables/useRegisterComponent";
 
 const PADDING_MAP = {
   none: "0",
@@ -27,28 +27,31 @@ const props = withDefaults(defineProps<Props>(), {
 
 const paddingValue = PADDING_MAP[props.padding as PaddingType];
 
-const elRef = ref<HTMLElement | null>(null)
-const pluginFooterHtml = ref<string | null>(null)
+const elRef = ref<HTMLElement | null>(null);
+const pluginFooterHtml = ref<string | null>(null);
 
-const id = props.componentId ?? `sl-card-${Math.random().toString(36).slice(2, 8)}`
+const id = props.componentId ?? `sl-card-${Math.random().toString(36).slice(2, 8)}`;
 useRegisterComponent(id, {
-  type: 'SLCard',
+  type: "SLCard",
   get: (prop) => {
-    if (prop === 'pluginFooter') return pluginFooterHtml.value
-    if (prop === 'title') return props.title
-    return undefined
+    if (prop === "pluginFooter") return pluginFooterHtml.value;
+    if (prop === "title") return props.title;
+    return undefined;
   },
   set: (prop, value) => {
-    if (prop === 'pluginFooter') {
+    if (prop === "pluginFooter") {
       pluginFooterHtml.value = value
-        ? DOMPurify.sanitize(value, { FORBID_TAGS: ['script', 'iframe', 'style', 'link'], FORBID_ATTR: ['style'] })
-        : null
+        ? DOMPurify.sanitize(value, {
+            FORBID_TAGS: ["script", "iframe", "style", "link"],
+            FORBID_ATTR: ["style"],
+          })
+        : null;
     }
   },
   call: () => undefined,
   on: () => () => {},
   el: () => elRef.value,
-})
+});
 </script>
 
 <template>
@@ -75,7 +78,11 @@ useRegisterComponent(id, {
       <slot name="footer" />
     </div>
 
-    <div v-if="pluginFooterHtml" class="sl-card-footer sl-card-plugin-footer" v-html="pluginFooterHtml" />
+    <div
+      v-if="pluginFooterHtml"
+      class="sl-card-footer sl-card-plugin-footer"
+      v-html="pluginFooterHtml"
+    />
   </div>
 </template>
 

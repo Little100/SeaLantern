@@ -1,5 +1,11 @@
 import { tauriInvoke } from "./tauri";
-import type { PluginInfo, PluginNavItem, PluginInstallResult, BatchInstallResult, PluginUpdateInfo } from "../types/plugin";
+import type {
+  PluginInfo,
+  PluginNavItem,
+  PluginInstallResult,
+  BatchInstallResult,
+  PluginUpdateInfo,
+} from "../types/plugin";
 
 // 插件市场的信息
 export interface MarketPluginInfo {
@@ -58,7 +64,10 @@ export async function getPluginSettings(pluginId: string): Promise<Record<string
   return tauriInvoke("get_plugin_settings", { pluginId });
 }
 
-export async function setPluginSettings(pluginId: string, settings: Record<string, unknown>): Promise<void> {
+export async function setPluginSettings(
+  pluginId: string,
+  settings: Record<string, unknown>,
+): Promise<void> {
   return tauriInvoke("set_plugin_settings", { pluginId, settings });
 }
 
@@ -94,7 +103,9 @@ export async function fetchMarketPluginDetail(pluginPath: string): Promise<Marke
   return tauriInvoke("fetch_market_plugin_detail", { pluginPath });
 }
 
-export async function fetchMarketCategories(marketUrl?: string): Promise<Record<string, Record<string, string> | string>> {
+export async function fetchMarketCategories(
+  marketUrl?: string,
+): Promise<Record<string, Record<string, string> | string>> {
   return tauriInvoke("fetch_market_categories", { marketUrl });
 }
 
@@ -108,7 +119,9 @@ export interface InstallFromMarketOptions {
   version?: string;
 }
 
-export async function installFromMarket(options: InstallFromMarketOptions): Promise<PluginInstallResult> {
+export async function installFromMarket(
+  options: InstallFromMarketOptions,
+): Promise<PluginInstallResult> {
   return tauriInvoke("install_from_market", {
     pluginId: options.pluginId,
     downloadUrl: options.downloadUrl,
@@ -136,7 +149,7 @@ export async function contextMenuCallback(
   pluginId: string,
   context: string,
   itemId: string,
-  targetData: Record<string, unknown>
+  targetData: Record<string, unknown>,
 ): Promise<void> {
   return tauriInvoke("context_menu_callback", { pluginId, context, itemId, targetData });
 }

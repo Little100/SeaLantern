@@ -88,7 +88,6 @@ async function applyAllSettings(): Promise<void> {
     applyColors(settings);
   }
   applyDeveloperMode(settings.developer_mode || false);
-
 }
 
 onMounted(async () => {

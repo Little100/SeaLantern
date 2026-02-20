@@ -13,11 +13,7 @@ export interface ComponentHandle {
 export interface ProxyInterceptor {
   pluginId: string;
   priority: number;
-  handler: (event: {
-    type: string;
-    value?: any;
-    componentId: string;
-  }) => boolean | void;
+  handler: (event: { type: string; value?: any; componentId: string }) => boolean | void;
 }
 
 const registry = reactive(new Map<string, ComponentHandle>());

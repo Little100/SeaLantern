@@ -80,7 +80,14 @@ interface NavItem {
 }
 
 const staticNavItems: NavItem[] = [
-  { name: "home", path: "/", icon: "home", labelKey: "common.home", label: i18n.t("common.home"), group: "main" },
+  {
+    name: "home",
+    path: "/",
+    icon: "home",
+    labelKey: "common.home",
+    label: i18n.t("common.home"),
+    group: "main",
+  },
   {
     name: "create",
     path: "/create",
@@ -129,7 +136,7 @@ const staticNavItems: NavItem[] = [
     label: i18n.t("common.settings"),
     group: "system",
   },
-  
+
   {
     name: "plugins",
     path: "/plugins",
@@ -162,10 +169,9 @@ const pluginNavItems = computed<NavItem[]>(() => {
 });
 
 function sidebarItemToNavItem(item: import("../../types/plugin").SidebarItem): NavItem {
-  const path = item.mode === 'category'
-    ? `/plugin-category/${item.pluginId}`
-    : `/plugin/${item.pluginId}`;
-  const pluginManifest = pluginStore.plugins.find(p => p.manifest.id === item.pluginId)?.manifest;
+  const path =
+    item.mode === "category" ? `/plugin-category/${item.pluginId}` : `/plugin/${item.pluginId}`;
+  const pluginManifest = pluginStore.plugins.find((p) => p.manifest.id === item.pluginId)?.manifest;
   return {
     name: `sidebar-${item.pluginId}`,
     path,
@@ -209,7 +215,9 @@ const navItems = computed<NavItem[]>(() => {
   result.push(...defaultItems);
 
   const handledPluginIds = new Set(pluginStore.sidebarItems.map((i) => i.pluginId));
-  result.push(...pluginNavItems.value.filter((i) => !i.pluginId || !handledPluginIds.has(i.pluginId)));
+  result.push(
+    ...pluginNavItems.value.filter((i) => !i.pluginId || !handledPluginIds.has(i.pluginId)),
+  );
 
   return result;
 });
@@ -426,8 +434,8 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
   let currentGroup: NavGroup | null = null;
 
   for (const item of navItems.value) {
-    if (item.group === 'plugins-custom') {
-      groups.push({ group: 'plugins-custom', items: [item] });
+    if (item.group === "plugins-custom") {
+      groups.push({ group: "plugins-custom", items: [item] });
       currentGroup = null;
       continue;
     }
@@ -448,15 +456,22 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
   <aside class="sidebar glass-strong" :class="{ collapsed: ui.sidebarCollapsed }">
     <div class="sidebar-logo" @click="navigateTo('/')">
       <div class="logo-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="28" height="28" :aria-label="i18n.t('common.app_name')" role="img">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+          width="28"
+          height="28"
+          :aria-label="i18n.t('common.app_name')"
+          role="img"
+        >
           <defs>
             <linearGradient id="sl-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#60a5fa"/>
-              <stop offset="100%" style="stop-color:#818cf8"/>
+              <stop offset="0%" style="stop-color: #60a5fa" />
+              <stop offset="100%" style="stop-color: #818cf8" />
             </linearGradient>
           </defs>
           <rect x="0" y="0" width="512" height="512" rx="128" fill="url(#sl-logo-grad)" />
-          <rect x="176" y="176" width="160" height="160" rx="48" fill="white" fill-opacity="0.85"/>
+          <rect x="176" y="176" width="160" height="160" rx="48" fill="white" fill-opacity="0.85" />
         </svg>
       </div>
       <transition name="fade">
@@ -466,7 +481,12 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
 
     <nav class="sidebar-nav">
       <!-- 服务器选择（Headless UI Listbox） -->
-      <Listbox v-if="serverOptions.length > 0" v-model="currentServerRef" class="server-selector" horizontal>
+      <Listbox
+        v-if="serverOptions.length > 0"
+        v-model="currentServerRef"
+        class="server-selector"
+        horizontal
+      >
         <div>
           <ListboxButton
             ref="listboxButton"
@@ -484,10 +504,7 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
           <!-- 将 ListboxOptions 渲染到 body（Portal），并使用固定定位样式 -->
           <Portal>
             <transition name="bubble">
-              <ListboxOptions
-                class="server-select-bubble-content-portal"
-                :style="optionsStyle"
-              >
+              <ListboxOptions class="server-select-bubble-content-portal" :style="optionsStyle">
                 <div class="server-select-bubble-body">
                   <ListboxOption
                     v-for="option in serverOptions"
@@ -496,7 +513,10 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
                     v-slot="{ selected }"
                   >
                     <div
-                      :class="['server-select-option', { active: option.value === currentServerRef }]"
+                      :class="[
+                        'server-select-option',
+                        { active: option.value === currentServerRef },
+                      ]"
                     >
                       {{ option.label }}
                     </div>
@@ -513,27 +533,23 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
 
       <!-- 按顺序渲染 -->
       <template v-for="(group, gi) in orderedNavGroups" :key="gi">
-        <div
-          v-if="group.group !== 'server' || serverOptions.length > 0"
-          class="nav-group"
-        >
+        <div v-if="group.group !== 'server' || serverOptions.length > 0" class="nav-group">
           <div v-if="group.group === 'plugins-custom'" class="nav-group-label">
             <transition name="fade">
-              <span v-if="!ui.sidebarCollapsed">{{ group.items[0]?.pluginName || group.items[0]?.label }}</span>
+              <span v-if="!ui.sidebarCollapsed">{{
+                group.items[0]?.pluginName || group.items[0]?.label
+              }}</span>
             </transition>
           </div>
           <div v-else-if="group.group === 'plugins-default'" class="nav-group-label">
             <transition name="fade">
-              <span v-if="!ui.sidebarCollapsed">{{ i18n.t('common.plugins') }}</span>
+              <span v-if="!ui.sidebarCollapsed">{{ i18n.t("common.plugins") }}</span>
             </transition>
           </div>
           <div v-else-if="group.group !== 'main'" class="nav-group-label"></div>
 
           <div>
-            <div
-              v-for="item in group.items"
-              :key="item.name"
-            >
+            <div v-for="item in group.items" :key="item.name">
               <div
                 class="nav-item"
                 :class="{ active: isActive(item.path) }"
@@ -548,7 +564,13 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
                   width="20"
                   height="20"
                 />
-                <component v-else :is="getNavIcon(item.icon)" class="nav-icon" :size="20" :stroke-width="1.8" />
+                <component
+                  v-else
+                  :is="getNavIcon(item.icon)"
+                  class="nav-icon"
+                  :size="20"
+                  :stroke-width="1.8"
+                />
                 <transition name="fade">
                   <span v-if="!ui.sidebarCollapsed" class="nav-label">
                     {{ item.labelKey ? i18n.t(item.labelKey) : item.label }}
@@ -573,7 +595,13 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
                     width="16"
                     height="16"
                   />
-                  <component v-else :is="getNavIcon(child.icon || 'puzzle')" class="nav-icon" :size="16" :stroke-width="1.8" />
+                  <component
+                    v-else
+                    :is="getNavIcon(child.icon || 'puzzle')"
+                    class="nav-icon"
+                    :size="16"
+                    :stroke-width="1.8"
+                  />
                   <transition name="fade">
                     <span v-if="!ui.sidebarCollapsed" class="nav-label">{{ child.label }}</span>
                   </transition>
@@ -588,7 +616,11 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
     <!-- 弹出服务器选择由 Listbox 管理（原手动气泡已移除） -->
 
     <div class="sidebar-footer">
-      <div class="nav-item" @click="navigateTo('/about')" :title="ui.sidebarCollapsed ? i18n.t('common.about') : ''">
+      <div
+        class="nav-item"
+        @click="navigateTo('/about')"
+        :title="ui.sidebarCollapsed ? i18n.t('common.about') : ''"
+      >
         <Info class="nav-icon" :size="20" :stroke-width="1.8" />
         <transition name="fade">
           <span v-if="!ui.sidebarCollapsed" class="nav-label">{{ i18n.t("common.about") }}</span>
@@ -757,8 +789,6 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
   color: var(--sl-primary);
 }
 
-
-
 .server-selector-icon {
   padding: 8px;
   border-radius: var(--sl-radius-md);
@@ -854,10 +884,6 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
 .bubble-close:hover {
   color: var(--sl-text-primary);
 }
-
-
-
-
 
 .bubble-close {
   background: none;
@@ -957,7 +983,7 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
 
 .nav-children {
   margin-left: 8px;
-  border-left: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
   padding-left: 4px;
 }
 
