@@ -69,6 +69,10 @@ pub struct AppSettings {
     #[serde(default = "default_theme")]
     pub theme: String,
 
+    // 颜色主题: 预设主题 ID 或 "custom"，默认 "default"
+    #[serde(default = "default_color")]
+    pub color: String,
+
     // 文本大小: 12-24，默认 14
     #[serde(default = "default_font_size")]
     pub font_size: u32,
@@ -134,6 +138,9 @@ fn default_window_height() -> u32 {
 fn default_theme() -> String {
     "auto".to_string()
 }
+fn default_color() -> String {
+    "default".to_string()
+}
 fn default_font_size() -> u32 {
     14
 }
@@ -173,6 +180,7 @@ impl Default for AppSettings {
             window_maximized: false,
             acrylic_enabled: false,
             theme: "auto".to_string(),
+            color: "default".to_string(),
             font_size: 14,
             font_family: String::new(),
             language: "zh-CN".to_string(),
