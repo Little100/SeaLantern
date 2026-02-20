@@ -12,21 +12,21 @@
       </div>
 
       <!-- Right Side: Interaction Area -->
-      <div class="flex items-center gap-3 flex-shrink-0 whitespace-nowrap">
+      <div class="flex items-center gap-3 flex-shrink-0">
         <!-- Idle State -->
         <template v-if="!isDownloading && !isExtracting && !successMessage">
-          <div class="w-36 flex-shrink-0">
-            <SLSelect
-              v-model="selectedVersion"
-              :options="versionOptions"
+          <div class="w-36">
+            <SLSelect 
+              v-model="selectedVersion" 
+              :options="versionOptions" 
               :disabled="loadingUrl"
               size="sm"
             />
           </div>
-          <SLButton
-            variant="primary"
+          <SLButton 
+            variant="primary" 
             size="sm"
-            :loading="loadingUrl"
+            :loading="loadingUrl" 
             @click="startDownload"
           >
             {{ i18n.t('settings.java_download_btn') }}
@@ -42,22 +42,22 @@
                  <span class="font-mono opacity-70">{{ isExtracting ? '' : `${progress.toFixed(0)}%` }}</span>
                </div>
                <div class="w-full h-1.5 bg-[var(--sl-border)] rounded-full overflow-hidden">
-                  <div
+                  <div 
                     class="h-full bg-[var(--sl-primary)] transition-all duration-300 ease-out"
                     :class="{ 'indeterminate-progress': isExtracting }"
                     :style="{ width: isExtracting ? '100%' : `${progress}%` }"
                   ></div>
                </div>
              </div>
-             <SLButton
-               size="sm"
-               variant="ghost"
-               class="!p-1.5 text-[var(--sl-text-tertiary)] hover:text-[var(--sl-error)]"
-               title="Cancel"
-               @click="cancelDownload"
-             >
-               <X :size="16" />
-             </SLButton>
+              <SLButton 
+                size="sm" 
+                variant="ghost" 
+                class="!p-1.5 text-[var(--sl-text-tertiary)] hover:text-[var(--sl-error)]"
+                title="Cancel"
+                @click="cancelDownload"
+              >
+                <X :size="16" :stroke-width="2" />
+              </SLButton>
           </div>
         </template>
 
@@ -65,8 +65,8 @@
         <template v-else-if="successMessage">
           <div class="flex items-center gap-3 animate-fade-in">
              <div class="flex items-center gap-1.5 text-[var(--sl-success)] text-sm font-medium">
-               <CheckCircle :size="16" fill="currentColor" />
-               <span>{{ i18n.t('settings.java_install_success').replace(':', '') }}</span>
+                <CheckCircle :size="16" />
+                <span>{{ i18n.t('settings.java_install_success').replace(':', '') }}</span>
              </div>
              <SLButton size="sm" variant="ghost" @click="resetState">OK</SLButton>
           </div>
@@ -77,7 +77,7 @@
     <!-- Error Message (Full Width below) -->
     <div v-if="errorMessage" class="mt-2 p-3 bg-red-50 dark:bg-red-900/20 text-[var(--sl-error)] text-sm rounded border border-red-200 dark:border-red-800 flex items-center justify-between animate-fade-in">
       <div class="flex items-center gap-2">
-        <Info :size="16" class="flex-shrink-0" fill="currentColor" />
+        <AlertCircle class="flex-shrink-0" :size="16" />
         <span>{{ errorMessage }}</span>
       </div>
       <SLButton size="sm" variant="ghost" @click="resetState">
@@ -87,7 +87,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
 import { i18n } from '../language';
@@ -95,7 +94,7 @@ import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { javaApi } from '../api/java';
 import SLButton from './common/SLButton.vue';
 import SLSelect from './common/SLSelect.vue';
-import { X, CheckCircle, Info } from 'lucide-vue-next';
+import { X, CheckCircle, AlertCircle } from 'lucide-vue-next';
 
 const emit = defineEmits(['installed']);
 
@@ -113,8 +112,7 @@ const unlistenProgress = ref<UnlistenFn | null>(null);
 const versionOptions = computed(() => [
   { label: 'Java 8 (LTS)', value: '8' },
   { label: 'Java 17 (LTS)', value: '17' },
-  { label: 'Java 21 (LTS)', value: '21' },
-  { label: 'Java 25 (LTS)', value: '25' }
+  { label: 'Java 21 (LTS)', value: '21' }
 ]);
 
 const resetState = () => {
@@ -130,14 +128,14 @@ const getDownloadUrl = async (version: string): Promise<string> => {
   const baseUrl = "https://api.adoptium.net/v3/binary/latest";
   const featureVersion = version;
   const releaseType = "ga";
-
+  
   // Detect OS and Arch
   let os = "windows";
   // Adoptium API uses 'mac' for macOS
   if (navigator.userAgent.indexOf("Mac") !== -1) os = "mac";
   if (navigator.userAgent.indexOf("Linux") !== -1) os = "linux";
 
-  let arch = "x64";
+  let arch = "x64"; 
   if (navigator.userAgent.indexOf("aarch64") !== -1 || navigator.userAgent.indexOf("arm64") !== -1) arch = "aarch64";
 
   return `${baseUrl}/${featureVersion}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse`;
@@ -152,7 +150,7 @@ const cancelDownload = async () => {
     loadingUrl.value = false;
     progress.value = 0;
     statusMessage.value = '';
-
+    
     if (unlistenProgress.value) {
       unlistenProgress.value();
       unlistenProgress.value = null;
@@ -174,11 +172,11 @@ const startDownload = async () => {
     statusMessage.value = i18n.t('settings.java_installing');
 
     if (unlistenProgress.value) unlistenProgress.value();
-
+    
     unlistenProgress.value = await listen('java-install-progress', (event: any) => {
       const payload = event.payload as { state: string, progress: number, total: number, message: string };
       statusMessage.value = payload.message;
-
+      
       if (payload.state === 'extracting') {
         isExtracting.value = true;
         progress.value = 100; // Force full bar or let indeterminate animation take over
@@ -194,11 +192,11 @@ const startDownload = async () => {
     });
 
     const resultPath = await javaApi.installJava(url, `jdk-${selectedVersion.value}`);
-
+    
     installedPath.value = resultPath;
     successMessage.value = 'Success'; // Just a flag, text is in template
     emit('installed', resultPath);
-
+    
   } catch (e: any) {
     console.error(e);
     isDownloading.value = false;

@@ -1,23 +1,38 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Loader2 } from "lucide-vue-next";
+import { useRegisterComponent } from '../../composables/useRegisterComponent'
 
 interface Props {
   variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
+  componentId?: string;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   variant: "primary",
   size: "md",
   disabled: false,
   loading: false,
 });
+
+const elRef = ref<HTMLElement | null>(null)
+const id = props.componentId ?? `sl-button-${Math.random().toString(36).slice(2, 8)}`
+useRegisterComponent(id, {
+  type: 'SLButton',
+  get: (prop) => prop === 'disabled' ? props.disabled : undefined,
+  set: () => {},
+  call: (method) => { if (method === 'click') elRef.value?.click() },
+  on: () => () => {},
+  el: () => elRef.value,
+})
 </script>
 
 <template>
   <button
+    ref="elRef"
     class="sl-button"
     :class="[
       `sl-button--${variant}`,

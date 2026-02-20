@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { Check, ChevronDown, Loader2, Search } from "lucide-vue-next";
 import { i18n } from "../../language";
+import { useRegisterComponent } from '../../composables/useRegisterComponent'
 
 interface Option {
   label: string;
@@ -19,6 +20,7 @@ interface Props {
   loading?: boolean;
   maxHeight?: string;
   previewFont?: boolean;
+  componentId?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -29,6 +31,16 @@ const props = withDefaults(defineProps<Props>(), {
   maxHeight: "280px",
   previewFont: false,
 });
+
+const _selectId = props.componentId ?? `sl-select-${Math.random().toString(36).slice(2, 8)}`
+useRegisterComponent(_selectId, {
+  type: 'SLSelect',
+  get: (prop) => prop === 'value' ? props.modelValue : undefined,
+  set: (prop, value) => { if (prop === 'value') emit('update:modelValue', value as string | number) },
+  call: () => undefined,
+  on: () => () => {},
+  el: () => containerRef.value,
+})
 
 const emit = defineEmits<{
   "update:modelValue": [value: string | number];

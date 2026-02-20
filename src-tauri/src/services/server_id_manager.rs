@@ -1,7 +1,7 @@
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
@@ -112,7 +112,10 @@ impl ServerIdManager {
         }
         drop(entries);
 
-        let now = Utc::now().timestamp() as u64;
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
         let entry = ServerIdEntry {
             id: id.clone(),
             name: req.name,
@@ -141,7 +144,12 @@ impl ServerIdManager {
                     return Err(format!("Server ID '{}' is inactive", id));
                 }
                 // Update last accessed time
-                entry.last_accessed_at = Some(Utc::now().timestamp() as u64);
+                entry.last_accessed_at = Some(
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap_or_default()
+                        .as_secs(),
+                );
                 Ok((entry.address.clone(), entry.port))
             }
             None => Err(format!("Server ID '{}' not found", id)),

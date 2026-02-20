@@ -2,14 +2,12 @@
 import { computed, ref, onMounted, onUnmounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Minus, Square, X, ChevronDown, ChevronUp } from "lucide-vue-next";
 import { useI18nStore } from "../../stores/i18nStore";
 import { i18n } from "../../language";
 import SLModal from "../common/SLModal.vue";
 import SLButton from "../common/SLButton.vue";
-import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { settingsApi, type AppSettings } from "../../api/settings";
-
-import { Minus, Square, X } from 'lucide-vue-next';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
 
 
