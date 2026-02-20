@@ -1,8 +1,10 @@
 use crate::commands::update_types::UpdateInfo;
+#[cfg(target_os = "linux")]
 use crate::commands::update_version::compare_versions;
 
 /// 检查是否为 Arch Linux 系统
 #[cfg(target_os = "linux")]
+#[allow(dead_code)]
 pub fn is_arch_linux() -> bool {
     if let Ok(content) = std::fs::read_to_string("/etc/os-release") {
         content.contains("ID=arch")
@@ -15,6 +17,7 @@ pub fn is_arch_linux() -> bool {
 
 /// 获取可用的 AUR 助手
 #[cfg(target_os = "linux")]
+#[allow(dead_code)]
 pub fn get_aur_helper() -> Option<String> {
     let helpers = ["yay", "paru", "pamac", "trizen", "pacaur"];
 
@@ -34,6 +37,7 @@ pub fn get_aur_helper() -> Option<String> {
 
 /// 检查 AUR 更新
 #[cfg(target_os = "linux")]
+#[allow(dead_code)]
 pub async fn check_aur_update(current_version: &str) -> Result<UpdateInfo, String> {
     let client = reqwest::Client::new();
     let url = "https://aur.archlinux.org/rpc/v5/info/sealantern";
@@ -107,18 +111,21 @@ pub async fn check_aur_update(current_version: &str) -> Result<UpdateInfo, Strin
 
 /// 非 Linux 系统的占位实现
 #[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
 pub fn is_arch_linux() -> bool {
     false
 }
 
 /// 非 Linux 系统的占位实现
 #[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
 pub fn get_aur_helper() -> Option<String> {
     None
 }
 
 /// 非 Linux 系统的占位实现
 #[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
 pub async fn check_aur_update(_current_version: &str) -> Result<UpdateInfo, String> {
     Err("AUR update check is only available on Linux".to_string())
 }

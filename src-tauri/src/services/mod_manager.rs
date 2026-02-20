@@ -4,6 +4,7 @@ use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[allow(dead_code)]
 pub struct ModInfo {
     pub id: String,
     pub name: String,
@@ -13,11 +14,13 @@ pub struct ModInfo {
     pub source: String, // "modrinth" or "curseforge"
 }
 
+#[allow(dead_code)]
 pub struct ModManager {
     client: Client,
 }
 
 impl ModManager {
+    #[allow(dead_code)]
     pub fn new() -> Result<Self, String> {
         Ok(ModManager {
             client: Client::builder()
@@ -27,6 +30,7 @@ impl ModManager {
         })
     }
 
+    #[allow(dead_code)]
     pub async fn search_modrinth(
         &self,
         query: &str,
@@ -67,6 +71,7 @@ impl ModManager {
         Ok(results)
     }
 
+    #[allow(dead_code)]
     async fn get_latest_modrinth_version(
         &self,
         project_id: &str,
@@ -102,6 +107,7 @@ impl ModManager {
         Err("No compatible version found".to_string())
     }
 
+    #[allow(dead_code)]
     pub async fn download_mod(&self, download_url: &str, target_path: &Path) -> Result<(), String> {
         let resp = self
             .client

@@ -216,6 +216,7 @@ pub type PluginPermission = String;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[allow(dead_code)]
 pub enum PermissionDangerLevel {
     Normal,
 
@@ -225,6 +226,7 @@ pub enum PermissionDangerLevel {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct PermissionMeta {
     pub id: &'static str,
 
@@ -237,6 +239,7 @@ pub struct PermissionMeta {
     pub icon: &'static str,
 }
 
+#[allow(dead_code)]
 pub fn get_all_permission_meta() -> Vec<PermissionMeta> {
     vec![
         PermissionMeta {
@@ -354,6 +357,7 @@ pub fn get_all_permission_meta() -> Vec<PermissionMeta> {
     ]
 }
 
+#[allow(dead_code)]
 pub fn get_permission_danger_level(permission_id: &str) -> PermissionDangerLevel {
     match permission_id {
         "execute_program" | "plugin_folder_access" | "ui.component.proxy" => {

@@ -15,6 +15,7 @@ pub struct UpdateInfo {
 
 /// 下载进度结构体
 #[derive(Debug, Serialize, Clone)]
+#[allow(dead_code)]
 pub struct DownloadProgress {
     pub downloaded: u64,
     pub total: u64,

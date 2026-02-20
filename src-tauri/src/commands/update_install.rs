@@ -1,25 +1,30 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+#[cfg(target_os = "linux")]
 use crate::commands::update_arch::{get_aur_helper, is_arch_linux};
 use crate::commands::update_types::PendingUpdate;
 use crate::commands::update_version::compare_versions;
 
 /// 安装进度标志
+#[allow(dead_code)]
 pub static INSTALL_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 
 /// 获取更新缓存目录
+#[allow(dead_code)]
 pub fn get_update_cache_dir() -> PathBuf {
     let cache_dir = dirs_next::cache_dir().unwrap_or_else(std::env::temp_dir);
     cache_dir.join("com.fpsz.sea-lantern").join("updates")
 }
 
 /// 获取待更新文件路径
+#[allow(dead_code)]
 pub fn get_pending_update_file() -> PathBuf {
     get_update_cache_dir().join("pending_update.json")
 }
 
 /// 执行更新安装
+#[allow(dead_code)]
 pub async fn execute_install(file_path: String, version: String) -> Result<(), String> {
     if INSTALL_IN_PROGRESS.swap(true, Ordering::SeqCst) {
         return Err("Install is already in progress".to_string());
@@ -115,6 +120,7 @@ pub async fn execute_install(file_path: String, version: String) -> Result<(), S
 }
 
 /// 检查待更新状态
+#[allow(dead_code)]
 pub async fn check_pending_update() -> Result<Option<PendingUpdate>, String> {
     let pending_file = get_pending_update_file();
 
@@ -144,6 +150,7 @@ pub async fn check_pending_update() -> Result<Option<PendingUpdate>, String> {
 }
 
 /// 清除待更新状态
+#[allow(dead_code)]
 pub async fn clear_pending_update() -> Result<(), String> {
     let pending_file = get_pending_update_file();
     if pending_file.exists() {
@@ -156,14 +163,15 @@ pub async fn clear_pending_update() -> Result<(), String> {
 /// Windows 平台特定实现
 #[cfg(target_os = "windows")]
 mod windows {
-    use super::*;
 
     /// 转义 PowerShell 单引号
+    #[allow(dead_code)]
     pub fn escape_powershell_single_quoted(value: &str) -> String {
         value.replace('\'', "''")
     }
 
     /// 构建隐藏的 PowerShell 命令
+    #[allow(dead_code)]
     pub fn build_hidden_powershell_command(command: &str) -> std::process::Command {
         let mut process = std::process::Command::new("powershell");
         process.args([
@@ -185,6 +193,7 @@ mod windows {
     }
 
     /// 启动更新重启监视器
+    #[allow(dead_code)]
     pub fn spawn_update_relaunch_watcher(
         installer_pid: u32,
         relaunch_exe: &str,
@@ -232,6 +241,7 @@ mod windows {
     }
 
     /// 以提升权限启动 Windows 进程
+    #[allow(dead_code)]
     pub fn spawn_elevated_windows_process(
         file_path: &str,
         args: &[&str],
@@ -294,7 +304,6 @@ mod windows {
 /// 非 Windows 平台的占位实现
 #[cfg(not(target_os = "windows"))]
 mod windows {
-    use super::*;
 
     pub fn spawn_elevated_windows_process(
         _file_path: &str,

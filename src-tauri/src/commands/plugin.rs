@@ -486,6 +486,7 @@ struct GitHubRelease {
     zipball_url: String,
 }
 
+#[allow(clippy::needless_option_as_deref)]
 fn resolve_github_download_url(
     github: &str,
     download_type: Option<&str>,
@@ -558,6 +559,7 @@ fn resolve_github_download_url(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn install_from_market(
     manager: tauri::State<'_, Arc<Mutex<PluginManager>>>,
     plugin_id: String,

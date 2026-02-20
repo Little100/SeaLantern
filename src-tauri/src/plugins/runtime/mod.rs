@@ -40,6 +40,7 @@ pub struct PluginRuntime {
 
     pub(super) process_registry: ProcessRegistry,
 
+    #[allow(dead_code)]
     element_callbacks: Arc<Mutex<std::collections::HashMap<u64, mlua::RegistryKey>>>,
 }
 
@@ -82,10 +83,12 @@ impl PluginRuntime {
         Ok(runtime)
     }
 
+    #[allow(dead_code)]
     pub fn is_loaded(&self) -> bool {
         self.loaded.load(Ordering::SeqCst)
     }
 
+    #[allow(dead_code)]
     pub(super) fn check_permission(&self, permission: &str) -> mlua::Result<()> {
         if self.permissions.iter().any(|p| p == permission) {
             Ok(())

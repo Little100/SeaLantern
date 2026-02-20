@@ -9,6 +9,7 @@ use tauri::{AppHandle, Emitter};
 use crate::commands::update_types::DownloadProgress;
 
 /// 从 URL 提取文件名
+#[allow(dead_code)]
 pub fn file_name_from_url(url: &str) -> String {
     let candidate = url.rsplit('/').next().unwrap_or("update");
     let candidate = candidate.split('?').next().unwrap_or("update");
@@ -21,6 +22,7 @@ pub fn file_name_from_url(url: &str) -> String {
 }
 
 /// 计算文件的 SHA256 哈希值
+#[allow(dead_code)]
 pub fn calculate_sha256(file_path: &PathBuf) -> Result<String, std::io::Error> {
     let mut file = File::open(file_path)?;
     let mut hasher = Sha256::new();
@@ -38,6 +40,7 @@ pub fn calculate_sha256(file_path: &PathBuf) -> Result<String, std::io::Error> {
 }
 
 /// 下载更新文件
+#[allow(dead_code)]
 pub async fn download_update_file(
     app: AppHandle,
     url: String,

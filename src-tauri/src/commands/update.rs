@@ -1,7 +1,9 @@
 use tauri::{command, AppHandle};
 
+#[cfg(target_os = "linux")]
+use crate::commands::update_arch;
 use crate::commands::{
-    update_arch, update_download, update_github, update_install, update_types,
+    update_download, update_github, update_install,
     update_types::{get_github_config, PendingUpdate, UpdateInfo},
 };
 
@@ -50,6 +52,7 @@ pub async fn open_download_url(url: String) -> Result<(), String> {
 
 /// 下载更新
 #[command]
+#[allow(dead_code)]
 pub async fn download_update(
     app: AppHandle,
     url: String,
@@ -61,30 +64,35 @@ pub async fn download_update(
 
 /// 安装更新
 #[command]
+#[allow(dead_code)]
 pub async fn install_update(file_path: String, version: String) -> Result<(), String> {
     update_install::execute_install(file_path, version).await
 }
 
 /// 检查待更新状态
 #[command]
+#[allow(dead_code)]
 pub async fn check_pending_update() -> Result<Option<PendingUpdate>, String> {
     update_install::check_pending_update().await
 }
 
 /// 清除待更新状态
 #[command]
+#[allow(dead_code)]
 pub async fn clear_pending_update() -> Result<(), String> {
     update_install::clear_pending_update().await
 }
 
 /// 重启并安装
 #[command]
+#[allow(dead_code)]
 pub async fn restart_and_install(app: AppHandle) -> Result<(), String> {
     app.restart();
 }
 
 /// 从调试 URL 下载更新
 #[command]
+#[allow(dead_code)]
 pub async fn download_update_from_debug_url(app: AppHandle, url: String) -> Result<String, String> {
     download_update(app, url, None).await
 }

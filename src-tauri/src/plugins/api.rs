@@ -126,6 +126,7 @@ pub fn take_ui_event_snapshot() -> Vec<BufferedUiEvent> {
     store.clone()
 }
 
+#[allow(dead_code)]
 pub fn clear_plugin_ui_snapshot(plugin_id: &str) {
     let mut store = get_ui_snapshot_store()
         .lock()

@@ -158,6 +158,7 @@ impl I18nService {
         locales
     }
 
+    #[allow(dead_code)]
     pub fn get_locale_display_name(&self, locale: &str) -> Option<String> {
         self.plugin_locale_names
             .read()
