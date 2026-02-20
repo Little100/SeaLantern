@@ -562,15 +562,18 @@ pub async fn open_download_url(url: String) -> Result<(), String> {
     opener::open(&url).map_err(|e| format!("open link failed: {}", e))
 }
 
+#[allow(dead_code)]
 fn get_update_cache_dir() -> PathBuf {
     let cache_dir = dirs_next::cache_dir().unwrap_or_else(std::env::temp_dir);
     cache_dir.join("com.fpsz.sea-lantern").join("updates")
 }
 
+#[allow(dead_code)]
 fn get_pending_update_file() -> PathBuf {
     get_update_cache_dir().join("pending_update.json")
 }
 
+#[allow(dead_code)]
 fn file_name_from_url(url: &str) -> String {
     let candidate = url.rsplit('/').next().unwrap_or("update");
     let candidate = candidate.split('?').next().unwrap_or("update");
@@ -583,11 +586,13 @@ fn file_name_from_url(url: &str) -> String {
 }
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 fn escape_powershell_single_quoted(value: &str) -> String {
     value.replace('\'', "''")
 }
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 fn build_hidden_powershell_command(command: &str) -> std::process::Command {
     let mut process = std::process::Command::new("powershell");
     process.args([
@@ -612,6 +617,7 @@ fn build_hidden_powershell_command(command: &str) -> std::process::Command {
 }
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 fn spawn_update_relaunch_watcher(
     installer_pid: u32,
     relaunch_exe: &str,
@@ -659,6 +665,7 @@ fn spawn_update_relaunch_watcher(
 }
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 fn spawn_elevated_windows_process(
     file_path: &str,
     args: &[&str],
@@ -715,12 +722,14 @@ fn spawn_elevated_windows_process(
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct PendingUpdate {
     pub file_path: String,
     pub version: String,
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn download_update(
     app: AppHandle,
     url: String,
@@ -780,7 +789,7 @@ pub async fn download_update(
     let file_path_str = file_path.to_string_lossy().to_string();
 
     if let Some(hash) = expected_hash {
-        let calculated_hash =
+        let calculated_hash = 
             calculate_sha256(&file_path).map_err(|e| format!("Failed to calculate hash: {}", e))?;
 
         if calculated_hash.to_lowercase() != hash.to_lowercase() {
@@ -795,6 +804,7 @@ pub async fn download_update(
     Ok(file_path_str)
 }
 
+#[allow(dead_code)]
 fn calculate_sha256(file_path: &PathBuf) -> Result<String, std::io::Error> {
     let mut file = File::open(file_path)?;
     let mut hasher = Sha256::new();
@@ -812,6 +822,7 @@ fn calculate_sha256(file_path: &PathBuf) -> Result<String, std::io::Error> {
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn install_update(file_path: String, version: String) -> Result<(), String> {
     if INSTALL_IN_PROGRESS.swap(true, Ordering::SeqCst) {
         return Err("Install is already in progress".to_string());
@@ -907,6 +918,7 @@ pub async fn install_update(file_path: String, version: String) -> Result<(), St
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn check_pending_update() -> Result<Option<PendingUpdate>, String> {
     let pending_file = get_pending_update_file();
 
@@ -936,6 +948,7 @@ pub async fn check_pending_update() -> Result<Option<PendingUpdate>, String> {
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn clear_pending_update() -> Result<(), String> {
     let pending_file = get_pending_update_file();
     if pending_file.exists() {
@@ -946,11 +959,13 @@ pub async fn clear_pending_update() -> Result<(), String> {
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn restart_and_install(app: AppHandle) -> Result<(), String> {
     app.restart();
 }
 
 #[command]
+#[allow(dead_code)]
 pub async fn download_update_from_debug_url(app: AppHandle, url: String) -> Result<String, String> {
     download_update(app, url, None).await
 }
