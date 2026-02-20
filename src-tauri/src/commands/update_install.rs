@@ -305,6 +305,7 @@ mod windows {
 #[cfg(not(target_os = "windows"))]
 mod windows {
 
+    #[allow(dead_code)]
     pub fn spawn_elevated_windows_process(
         _file_path: &str,
         _args: &[&str],

@@ -876,6 +876,7 @@ impl ServerManager {
     }
 }
 
+#[cfg(target_os = "windows")]
 fn escape_cmd_arg(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 8);
     for c in s.chars() {
