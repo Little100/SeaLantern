@@ -537,11 +537,11 @@ impl PluginManager {
     }
 
     pub fn install_plugin(&mut self, path: &Path) -> Result<PluginInstallResult, String> {
-        let plugin_info = if path.extension().map_or(false, |ext| ext == "zip") {
+        let plugin_info = if path.extension().is_some_and(|ext| ext == "zip") {
             self.install_plugin_from_zip(path)?
         } else if path
             .file_name()
-            .map_or(false, |name| name == "manifest.json")
+            .is_some_and(|name| name == "manifest.json")
         {
             let plugin_dir = path.parent().ok_or("Invalid manifest path")?;
             self.install_plugin_from_dir(plugin_dir)?
@@ -820,19 +820,17 @@ impl PluginManager {
                 target_path
                     .canonicalize()
                     .unwrap_or_else(|_| target_path.clone())
-            } else {
-                if let Some(parent) = target_path.parent() {
-                    if parent.exists() {
-                        let canonical_parent = parent
-                            .canonicalize()
-                            .unwrap_or_else(|_| parent.to_path_buf());
-                        canonical_parent.join(target_path.file_name().unwrap_or_default())
-                    } else {
-                        target_path.clone()
-                    }
+            } else if let Some(parent) = target_path.parent() {
+                if parent.exists() {
+                    let canonical_parent = parent
+                        .canonicalize()
+                        .unwrap_or_else(|_| parent.to_path_buf());
+                    canonical_parent.join(target_path.file_name().unwrap_or_default())
                 } else {
                     target_path.clone()
                 }
+            } else {
+                target_path.clone()
             };
             let canonical_base = target_dir
                 .canonicalize()

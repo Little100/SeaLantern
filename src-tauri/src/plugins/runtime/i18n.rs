@@ -28,7 +28,7 @@ impl PluginRuntime {
             .create_function(move |_, args: mlua::Variadic<mlua::Value>| {
                 let i18n = i18n_service();
 
-                let key = match args.get(0) {
+                let key = match args.first() {
                     Some(mlua::Value::String(s)) => {
                         s.to_str().map(|s| s.to_string()).unwrap_or_default()
                     }
@@ -41,10 +41,8 @@ impl PluginRuntime {
 
                 if let Some(mlua::Value::Table(options)) = args.get(1) {
                     let mut opts = std::collections::HashMap::new();
-                    for pair in options.pairs::<String, String>() {
-                        if let Ok((k, v)) = pair {
-                            opts.insert(k, v);
-                        }
+                    for (k, v) in options.pairs::<String, String>().flatten() {
+                        opts.insert(k, v);
                     }
                     Ok(i18n.t_with_options(&key, &opts))
                 } else {
@@ -159,10 +157,8 @@ impl PluginRuntime {
                 use crate::plugins::api::emit_i18n_event;
                 let i18n = i18n_service();
                 let mut map = std::collections::HashMap::new();
-                for pair in entries.pairs::<String, String>() {
-                    if let Ok((k, v)) = pair {
-                        map.insert(k, v);
-                    }
+                for (k, v) in entries.pairs::<String, String>().flatten() {
+                    map.insert(k, v);
                 }
                 i18n.add_plugin_translations(&pid_add, &locale, map.clone());
                 let payload = serde_json::to_string(&map).unwrap_or_else(|_| "{}".to_string());

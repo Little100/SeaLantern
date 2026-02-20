@@ -36,28 +36,28 @@ impl SemVer {
     pub fn satisfies(&self, requirement: &str) -> bool {
         let req = requirement.trim();
 
-        if req.starts_with(">=") {
-            if let Some(target) = SemVer::parse(&req[2..]) {
+        if let Some(stripped) = req.strip_prefix(">=") {
+            if let Some(target) = SemVer::parse(stripped) {
                 return self.compare(&target) != Ordering::Less;
             }
-        } else if req.starts_with('>') && !req.starts_with(">=") {
-            if let Some(target) = SemVer::parse(&req[1..]) {
+        } else if let Some(stripped) = req.strip_prefix('>') {
+            if let Some(target) = SemVer::parse(stripped) {
                 return self.compare(&target) == Ordering::Greater;
             }
-        } else if req.starts_with("<=") {
-            if let Some(target) = SemVer::parse(&req[2..]) {
+        } else if let Some(stripped) = req.strip_prefix("<=") {
+            if let Some(target) = SemVer::parse(stripped) {
                 return self.compare(&target) != Ordering::Greater;
             }
-        } else if req.starts_with('<') && !req.starts_with("<=") {
-            if let Some(target) = SemVer::parse(&req[1..]) {
+        } else if let Some(stripped) = req.strip_prefix('<') {
+            if let Some(target) = SemVer::parse(stripped) {
                 return self.compare(&target) == Ordering::Less;
             }
-        } else if req.starts_with('=') {
-            if let Some(target) = SemVer::parse(&req[1..]) {
+        } else if let Some(stripped) = req.strip_prefix('=') {
+            if let Some(target) = SemVer::parse(stripped) {
                 return self.compare(&target) == Ordering::Equal;
             }
-        } else if req.starts_with('^') {
-            if let Some(target) = SemVer::parse(&req[1..]) {
+        } else if let Some(stripped) = req.strip_prefix('^') {
+            if let Some(target) = SemVer::parse(stripped) {
                 if self.compare(&target) == Ordering::Less {
                     return false;
                 }
@@ -69,17 +69,15 @@ impl SemVer {
                 }
                 return self.major == target.major;
             }
-        } else if req.starts_with('~') {
-            if let Some(target) = SemVer::parse(&req[1..]) {
+        } else if let Some(stripped) = req.strip_prefix('~') {
+            if let Some(target) = SemVer::parse(stripped) {
                 if self.compare(&target) == Ordering::Less {
                     return false;
                 }
                 return self.major == target.major && self.minor == target.minor;
             }
-        } else {
-            if let Some(target) = SemVer::parse(req) {
-                return self.compare(&target) == Ordering::Equal;
-            }
+        } else if let Some(target) = SemVer::parse(req) {
+            return self.compare(&target) == Ordering::Equal;
         }
 
         false

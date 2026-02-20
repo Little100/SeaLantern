@@ -74,7 +74,7 @@ impl PluginRuntime {
                     ));
                 }
                 let url: String = args
-                    .get(0)
+                    .front()
                     .and_then(|v| match v {
                         Value::String(s) => s.to_str().ok().map(|s| s.to_string()),
                         _ => None,
@@ -107,7 +107,7 @@ impl PluginRuntime {
                     Ok(resp) => build_response_table(lua, resp, MAX_RESPONSE_SIZE),
                     Err(e) => {
                         let nil = Value::Nil;
-                        let err = Value::String(lua.create_string(&format!("{}", e))?);
+                        let err = Value::String(lua.create_string(format!("{}", e))?);
                         Ok(MultiValue::from_vec(vec![nil, err]))
                     }
                 }
@@ -128,7 +128,7 @@ impl PluginRuntime {
                     ));
                 }
                 let url: String = args
-                    .get(0)
+                    .front()
                     .and_then(|v| match v {
                         Value::String(s) => s.to_str().ok().map(|s| s.to_string()),
                         _ => None,
@@ -170,7 +170,7 @@ impl PluginRuntime {
                     Ok(resp) => build_response_table(lua, resp, MAX_RESPONSE_SIZE),
                     Err(e) => {
                         let nil = Value::Nil;
-                        let err = Value::String(lua.create_string(&format!("{}", e))?);
+                        let err = Value::String(lua.create_string(format!("{}", e))?);
                         Ok(MultiValue::from_vec(vec![nil, err]))
                     }
                 }
@@ -191,7 +191,7 @@ impl PluginRuntime {
                     ));
                 }
                 let url: String = args
-                    .get(0)
+                    .front()
                     .and_then(|v| match v {
                         Value::String(s) => s.to_str().ok().map(|s| s.to_string()),
                         _ => None,
@@ -233,7 +233,7 @@ impl PluginRuntime {
                     Ok(resp) => build_response_table(lua, resp, MAX_RESPONSE_SIZE),
                     Err(e) => {
                         let nil = Value::Nil;
-                        let err = Value::String(lua.create_string(&format!("{}", e))?);
+                        let err = Value::String(lua.create_string(format!("{}", e))?);
                         Ok(MultiValue::from_vec(vec![nil, err]))
                     }
                 }
@@ -254,7 +254,7 @@ impl PluginRuntime {
                     ));
                 }
                 let url: String = args
-                    .get(0)
+                    .front()
                     .and_then(|v| match v {
                         Value::String(s) => s.to_str().ok().map(|s| s.to_string()),
                         _ => None,
@@ -287,7 +287,7 @@ impl PluginRuntime {
                     Ok(resp) => build_response_table(lua, resp, MAX_RESPONSE_SIZE),
                     Err(e) => {
                         let nil = Value::Nil;
-                        let err = Value::String(lua.create_string(&format!("{}", e))?);
+                        let err = Value::String(lua.create_string(format!("{}", e))?);
                         Ok(MultiValue::from_vec(vec![nil, err]))
                     }
                 }
@@ -312,10 +312,8 @@ fn parse_http_options(
 
     if let Some(Value::Table(opts)) = options {
         if let Ok(Value::Table(h)) = opts.get::<Value>("headers") {
-            for pair in h.pairs::<String, String>() {
-                if let Ok((k, v)) = pair {
-                    headers.push((k, v));
-                }
+            for (k, v) in h.pairs::<String, String>().flatten() {
+                headers.push((k, v));
             }
         }
 
@@ -364,7 +362,7 @@ fn build_response_table(
         if len > max_size {
             let nil = Value::Nil;
             let err = Value::String(
-                lua.create_string(&format!("响应体过大: {} 字节，限制 {} 字节", len, max_size))?,
+                lua.create_string(format!("响应体过大: {} 字节，限制 {} 字节", len, max_size))?,
             );
             return Ok(MultiValue::from_vec(vec![nil, err]));
         }
@@ -376,7 +374,7 @@ fn build_response_table(
 
     if body_bytes.len() as u64 > max_size {
         let nil = Value::Nil;
-        let err = Value::String(lua.create_string(&format!(
+        let err = Value::String(lua.create_string(format!(
             "响应体过大: {} 字节，限制 {} 字节",
             body_bytes.len(),
             max_size

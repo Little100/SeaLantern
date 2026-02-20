@@ -149,12 +149,10 @@ impl PluginRuntime {
 
                 let table = lua.create_table()?;
                 let mut i = 1;
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        if let Some(name) = entry.file_name().to_str() {
-                            table.set(i, name.to_string())?;
-                            i += 1;
-                        }
+                for entry in entries.flatten() {
+                    if let Some(name) = entry.file_name().to_str() {
+                        table.set(i, name.to_string())?;
+                        i += 1;
                     }
                 }
                 Ok(table)

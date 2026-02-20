@@ -19,14 +19,7 @@ impl PluginRuntime {
             .create_function(move |_, ()| {
                 let _ = emit_permission_log(&pid, "api_call", "sl.system.get_os", "");
                 let os = std::env::consts::OS;
-
-                let os_name = match os {
-                    "macos" => "macos",
-                    "linux" => "linux",
-                    "windows" => "windows",
-                    other => other,
-                };
-                Ok(os_name.to_string())
+                Ok(os.to_string())
             })
             .map_err(|e| format!("Failed to create system.get_os: {}", e))?;
         system_table

@@ -469,12 +469,10 @@ impl PluginRuntime {
                 let selector = String::from_utf8_lossy(&selector.as_bytes()).into_owned();
 
                 let mut style_map = serde_json::Map::new();
-                for pair in styles.pairs::<mlua::String, mlua::String>() {
-                    if let Ok((key, value)) = pair {
-                        let key = String::from_utf8_lossy(&key.as_bytes()).into_owned();
-                        let value = String::from_utf8_lossy(&value.as_bytes()).into_owned();
-                        style_map.insert(key, serde_json::Value::String(value));
-                    }
+                for (key, value) in styles.pairs::<mlua::String, mlua::String>().flatten() {
+                    let key = String::from_utf8_lossy(&key.as_bytes()).into_owned();
+                    let value = String::from_utf8_lossy(&value.as_bytes()).into_owned();
+                    style_map.insert(key, serde_json::Value::String(value));
                 }
                 let styles_json = serde_json::to_string(&style_map).unwrap_or_default();
 
@@ -645,20 +643,18 @@ impl PluginRuntime {
                             String::from_utf8_lossy(&component_id.as_bytes()).into_owned();
 
                         let mut props_map = serde_json::Map::new();
-                        for pair in props.pairs::<mlua::String, mlua::Value>() {
-                            if let Ok((key, value)) = pair {
-                                let key_str = String::from_utf8_lossy(&key.as_bytes()).into_owned();
-                                let json_val = match value {
-                                    mlua::Value::Boolean(b) => serde_json::Value::Bool(b),
-                                    mlua::Value::Integer(i) => serde_json::json!(i),
-                                    mlua::Value::Number(n) => serde_json::json!(n),
-                                    mlua::Value::String(s) => serde_json::Value::String(
-                                        String::from_utf8_lossy(&s.as_bytes()).into_owned(),
-                                    ),
-                                    _ => serde_json::Value::Null,
-                                };
-                                props_map.insert(key_str, json_val);
-                            }
+                        for (key, value) in props.pairs::<mlua::String, mlua::Value>().flatten() {
+                            let key_str = String::from_utf8_lossy(&key.as_bytes()).into_owned();
+                            let json_val = match value {
+                                mlua::Value::Boolean(b) => serde_json::Value::Bool(b),
+                                mlua::Value::Integer(i) => serde_json::json!(i),
+                                mlua::Value::Number(n) => serde_json::json!(n),
+                                mlua::Value::String(s) => serde_json::Value::String(
+                                    String::from_utf8_lossy(&s.as_bytes()).into_owned(),
+                                ),
+                                _ => serde_json::Value::Null,
+                            };
+                            props_map.insert(key_str, json_val);
                         }
 
                         let payload = serde_json::json!({

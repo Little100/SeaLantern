@@ -581,7 +581,7 @@ impl ApiRegistryOps for ApiRegistry {
         });
         let plugin_apis = registry
             .entry(plugin_id.to_string())
-            .or_insert_with(HashMap::new);
+            .or_default();
         plugin_apis.insert(api_name.to_string(), lua_fn_name.to_string());
     }
 

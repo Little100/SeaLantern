@@ -1,5 +1,5 @@
 use mlua::{Lua, Result as LuaResult, Value};
-use serde_json::{Map, Value as JsonValue};
+use serde_json::{Value as JsonValue};
 use std::path::{Path, PathBuf};
 
 pub(crate) const MAX_RECURSION_DEPTH: usize = 64;
@@ -22,17 +22,15 @@ pub(crate) fn json_value_from_lua(value: &Value, depth: usize) -> Result<JsonVal
         Value::Table(t) => {
             let mut is_array = true;
             let mut max_index = 0;
-            for pair in t.clone().pairs::<Value, Value>() {
-                if let Ok((k, _)) = pair {
-                    if let Value::Integer(i) = k {
-                        if i > 0 {
-                            max_index = max_index.max(i as usize);
-                            continue;
-                        }
+            for (k, _) in t.clone().pairs::<Value, Value>().flatten() {
+                if let Value::Integer(i) = k {
+                    if i > 0 {
+                        max_index = max_index.max(i as usize);
+                        continue;
                     }
-                    is_array = false;
-                    break;
                 }
+                is_array = false;
+                break;
             }
 
             if is_array && max_index > 0 {
@@ -46,11 +44,9 @@ pub(crate) fn json_value_from_lua(value: &Value, depth: usize) -> Result<JsonVal
                 }
                 Ok(JsonValue::Array(arr))
             } else {
-                let mut map = Map::new();
-                for pair in t.clone().pairs::<String, Value>() {
-                    if let Ok((k, v)) = pair {
-                        map.insert(k, json_value_from_lua(&v, depth + 1)?);
-                    }
+                let mut map = serde_json::Map::new();
+                for (k, v) in t.clone().pairs::<String, Value>().flatten() {
+                    map.insert(k, json_value_from_lua(&v, depth + 1)?);
                 }
                 Ok(JsonValue::Object(map))
             }

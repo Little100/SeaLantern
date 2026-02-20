@@ -68,7 +68,7 @@ impl PluginRuntime {
 
         fn is_command_allowed(command: &str) -> Result<(), String> {
             let cmd_lower = command.to_lowercase();
-            let cmd_first = cmd_lower.trim().split_whitespace().next().unwrap_or("");
+            let cmd_first = cmd_lower.split_whitespace().next().unwrap_or("");
 
             for blocked in BLOCKED_COMMANDS {
                 if cmd_first == *blocked {

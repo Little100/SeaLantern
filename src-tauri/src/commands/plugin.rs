@@ -87,8 +87,8 @@ pub fn install_plugin(
     let file_path = std::path::PathBuf::from(path);
     let is_zip = file_path.extension().and_then(|e| e.to_str()) == Some("zip");
     let is_manifest = file_path
-        .file_name()
-        .map_or(false, |name| name == "manifest.json");
+            .file_name()
+            .is_some_and(|name| name == "manifest.json");
     let is_dir = file_path.is_dir();
 
     if !is_zip && !is_manifest && !is_dir {
@@ -501,10 +501,9 @@ fn resolve_github_download_url(
     let download_type = download_type.unwrap_or("release");
 
     if download_type == "release" {
-        let api_url = if version.is_none() || version == Some("latest") {
-            format!("https://api.github.com/repos/{}/releases/latest", github)
-        } else {
-            format!("https://api.github.com/repos/{}/releases/tags/{}", github, version.unwrap())
+        let api_url = match version.as_deref() {
+            None | Some("latest") => format!("https://api.github.com/repos/{}/releases/latest", github),
+            Some(tag) => format!("https://api.github.com/repos/{}/releases/tags/{}", github, tag)
         };
 
         let response = client
@@ -535,7 +534,7 @@ fn resolve_github_download_url(
             let parsed =
                 Url::parse(&url).map_err(|e| format!("Invalid browser_download_url: {}", e))?;
             let host = parsed.host_str().unwrap_or("");
-            if !ALLOWED_DOWNLOAD_DOMAINS.iter().any(|&d| host == d) {
+            if !ALLOWED_DOWNLOAD_DOMAINS.contains(&host) {
                 return Err(format!(
                     "browser_download_url domain '{}' is not in the allowed list",
                     host

@@ -3,14 +3,19 @@ use std::sync::RwLock;
 
 pub const SUPPORTED_LOCALES: &[&str] = &["zh-CN", "en-US", "zh-TW"];
 
+// 类型别名，简化复杂类型定义
+type LocaleCallback = Box<dyn Fn(&str, &str) + Send + Sync>;
+type TranslationsMap = HashMap<String, HashMap<String, String>>;
+type PluginTranslationsMap = HashMap<String, TranslationsMap>;
+
 pub struct I18nService {
-    translations: RwLock<HashMap<String, HashMap<String, String>>>,
+    translations: RwLock<TranslationsMap>,
     locale: RwLock<String>,
-    change_callbacks: RwLock<HashMap<usize, Box<dyn Fn(&str, &str) + Send + Sync>>>,
+    change_callbacks: RwLock<HashMap<usize, LocaleCallback>>,
     next_callback_id: RwLock<usize>,
     plugin_locale_owners: RwLock<HashMap<String, String>>,
     plugin_locale_names: RwLock<HashMap<String, String>>,
-    plugin_translations: RwLock<HashMap<String, HashMap<String, HashMap<String, String>>>>,
+    plugin_translations: RwLock<PluginTranslationsMap>,
 }
 
 #[derive(Clone, Debug)]
@@ -181,10 +186,10 @@ impl I18nService {
         let mut plugin_trans = self.plugin_translations.write().unwrap();
         let plugin_map = plugin_trans
             .entry(plugin_id.to_string())
-            .or_insert_with(HashMap::new);
+            .or_default();
         let locale_map = plugin_map
             .entry(locale.to_string())
-            .or_insert_with(HashMap::new);
+            .or_default();
         locale_map.extend(entries);
     }
 

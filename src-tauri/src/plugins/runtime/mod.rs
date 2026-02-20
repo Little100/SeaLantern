@@ -383,17 +383,13 @@ impl PluginRuntime {
 
         let mut dynamic_items = Vec::new();
         if let Value::Table(tbl) = result {
-            for pair in tbl.sequence_values::<Value>() {
-                if let Ok(item_val) = pair {
-                    if let Ok(json_item) = json_value_from_lua(&item_val, 0) {
-                        if let JsonValue::Object(mut obj) = json_item {
-                            obj.insert(
-                                "pluginId".to_string(),
-                                JsonValue::String(self.plugin_id.clone()),
-                            );
-                            dynamic_items.push(JsonValue::Object(obj));
-                        }
-                    }
+            for item_val in tbl.sequence_values::<Value>().flatten() {
+                if let Ok(JsonValue::Object(mut obj)) = json_value_from_lua(&item_val, 0) {
+                    obj.insert(
+                        "pluginId".to_string(),
+                        JsonValue::String(self.plugin_id.clone()),
+                    );
+                    dynamic_items.push(JsonValue::Object(obj));
                 }
             }
         }

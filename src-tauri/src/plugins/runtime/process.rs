@@ -94,10 +94,8 @@ impl PluginRuntime {
                                 cwd = validate_path_static(&dir, &cwd_str)?;
                             }
                             if let Ok(env_table) = opts.get::<Table>("env") {
-                                for pair in env_table.pairs::<String, String>() {
-                                    if let Ok((k, v)) = pair {
-                                        env_vars.push((k, v));
-                                    }
+                                for (k, v) in env_table.pairs::<String, String>().flatten() {
+                                    env_vars.push((k, v));
                                 }
                             }
                             if let Ok(bg) = opts.get::<bool>("background") {

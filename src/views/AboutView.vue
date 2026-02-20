@@ -13,24 +13,6 @@ import {
 import { checkUpdate, type UpdateInfo } from "../api/update";
 import { getAppVersion, BUILD_YEAR } from "../utils/version";
 import { i18n } from "../language";
-import {
-  Link,
-  Copy,
-  Check,
-  Plus,
-  ArrowRight,
-  AlertCircle,
-  ExternalLink,
-  RefreshCw,
-  XCircle,
-  Code,
-  Feather,
-  Lightbulb,
-  BookOpen,
-  Globe,
-  Rocket,
-  SquarePen,
-} from "lucide-vue-next";
 
 const version = ref("Loading...");
 const buildDate = BUILD_YEAR;
@@ -115,44 +97,18 @@ function getSocialTitle(platform: string): string {
   };
   return titles[platform] || platform;
 }
-    const info = await updateStore.checkForUpdate();
-
-    // 如果是 AUR 更新，显示提示窗口
-    if (info?.source === "arch-aur") {
-      const helper =
-        info.release_notes?.match(/yay|paru|pamac|trizen|pacaur/)?.[0] || "yay";
-      const hasUpdate = info.has_update;
-
-      aurUpdateInfo.value = {
-        hasUpdate,
-        currentVersion: info.current_version,
-        latestVersion: info.latest_version,
-        helper: helper,
-        command: `${helper} -Rns sealantern && ${helper} -S sealantern`,
-      };
-
-      showAurWindow.value = true;
-    }
-  } catch (error) {
-    showNotify(
-      `${i18n.t("about.update_check_failed")}: ${String(error)}`,
-      "error",
-    );
-  }
-}
 
 async function handlePrimaryUpdateAction() {
   // 如果是 AUR 更新，显示提示窗口
-  if (isAurUpdate.value && updateStore.updateInfo) {
+  if (isAurUpdate.value && updateInfo.value) {
     const helper =
-      updateStore.updateInfo.release_notes?.match(
+      updateInfo.value.release_notes?.match(
         /yay|paru|pamac|trizen|pacaur/,
       )?.[0] || "yay";
 
-    aurUpdateInfo.value = {
-      hasUpdate: updateStore.updateInfo.has_update,
-      currentVersion: updateStore.updateInfo.current_version,
-      latestVersion: updateStore.updateInfo.latest_version,
+    aurInfo.value = {
+      currentVersion: updateInfo.value.current_version,
+      latestVersion: updateInfo.value.latest_version,
       helper: helper,
       command: `${helper} -Rns sealantern && ${helper} -S sealantern`,
     };
@@ -160,6 +116,7 @@ async function handlePrimaryUpdateAction() {
     showAurWindow.value = true;
     return;
   }
+}
 
 function getCustomLinks(links: SocialLinks): [string, string][] {
   const predefined = ["gitee", "github", "bilibili", "qq"];
