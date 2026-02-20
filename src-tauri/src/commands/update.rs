@@ -5,6 +5,19 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
+
+// 下载进度结构体
+#[derive(Debug, Serialize, Clone)]
+#[allow(dead_code)]
+struct DownloadProgress {
+    downloaded: u64,
+    total: u64,
+    percent: f64,
+}
+
+// 安装进度标志
+#[allow(dead_code)]
+static INSTALL_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 use tauri::{command, AppHandle, Emitter};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
