@@ -85,15 +85,8 @@ onMounted(async () => {
     applyFontSize(settings.font_size || 14);
     applyFontFamily(settings.font_family || "");
 
-    try {
-      const { setupTray } = await import("./utils/tray");
-      if (typeof setupTray === "function") {
-        await setupTray();
-        console.log("Tray setup completed");
-      }
-    } catch (trayErr) {
-      console.warn("Failed to set up tray, tray functionality will be unavailable:", trayErr);
-    }
+    // 托盘图标已在 Rust 后端创建，前端不需要再创建
+    // 相关代码在 src-tauri/src/lib.rs 的 .setup() 中
 
     try {
       await pluginStore.loadPlugins();
