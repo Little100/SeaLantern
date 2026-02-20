@@ -19,20 +19,11 @@ pub struct UpdateInfo {
     pub sha256: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct DownloadProgress {
-    pub downloaded: u64,
-    pub total: u64,
-    pub percent: f64,
-}
-
 struct RepoConfig {
     owner: &'static str,
     repo: &'static str,
     api_base: &'static str,
 }
-
-static INSTALL_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 
 // ========== Arch Linux 相关函数 ==========
 #[cfg(target_os = "linux")]

@@ -274,17 +274,17 @@ async function doTogglePlugin(id: string, enable: boolean) {
 
 function getStatusColor(state: PluginState): string {
   if (typeof state === "object" && "error" in state) {
-    return "var(--color-danger)";
+    return "var(--sl-error)";
   }
   switch (state) {
     case "enabled":
-      return "var(--color-success)";
+      return "var(--sl-success)";
     case "disabled":
-      return "var(--color-text-tertiary)";
+      return "var(--sl-text-tertiary)";
     case "loaded":
-      return "var(--color-info)";
+      return "var(--sl-info)";
     default:
-      return "var(--color-text-secondary)";
+      return "var(--sl-text-secondary)";
   }
 }
 
@@ -1389,22 +1389,22 @@ function goToMarket() {
 .page-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0;
 }
 
 .plugin-count {
   font-size: 14px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .plugin-search {
   height: 28px;
   padding: 0 10px;
   border-radius: 6px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-bg-secondary);
+  color: var(--sl-text-primary);
   font-size: 13px;
   width: 180px;
   outline: none;
@@ -1412,7 +1412,7 @@ function goToMarket() {
 }
 
 .plugin-search:focus {
-  border-color: var(--color-primary);
+  border-color: var(--sl-primary);
 }
 
 .upload-zone {
@@ -1421,21 +1421,21 @@ function goToMarket() {
   justify-content: center;
   padding: 24px;
   margin-bottom: 16px;
-  border: 2px dashed var(--color-border);
+  border: 2px dashed var(--sl-border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .upload-zone:hover {
-  border-color: var(--color-primary);
-  background: var(--color-bg-tertiary);
+  border-color: var(--sl-primary);
+  background: var(--sl-bg-tertiary);
 }
 
 .upload-zone.is-dragging {
   border-style: solid;
-  border-color: var(--color-primary);
-  background: rgba(var(--color-primary-rgb, 59, 130, 246), 0.1);
+  border-color: var(--sl-primary);
+  background: var(--sl-primary-bg);
 }
 
 .upload-zone.is-installing {
@@ -1452,18 +1452,18 @@ function goToMarket() {
 }
 
 .upload-icon {
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   transition: color 0.2s ease;
 }
 
 .upload-zone:hover .upload-icon,
 .upload-zone.is-dragging .upload-icon {
-  color: var(--color-primary);
+  color: var(--sl-primary);
 }
 
 .upload-text {
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   text-align: center;
 }
 
@@ -1481,7 +1481,7 @@ function goToMarket() {
 
 .batch-section-title {
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -1504,34 +1504,34 @@ function goToMarket() {
 }
 
 .batch-item.success {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: var(--sl-success-bg);
+  border: 1px solid var(--sl-success);
 }
 
 .batch-item.failed {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--sl-error-bg);
+  border: 1px solid var(--sl-error);
   flex-direction: column;
   align-items: flex-start;
 }
 
 .batch-item-name {
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   font-weight: 500;
 }
 
 .batch-item-version {
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   font-size: 12px;
 }
 
 .batch-item-path {
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   font-weight: 500;
 }
 
 .batch-item-error {
-  color: var(--color-danger);
+  color: var(--sl-error);
   font-size: 12px;
 }
 
@@ -1542,8 +1542,8 @@ function goToMarket() {
   padding: 12px 16px;
   margin-bottom: 16px;
   border-radius: 8px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-danger);
+  background: var(--sl-error-bg);
+  border: 1px solid var(--sl-error);
 }
 
 .error-icon {
@@ -1553,14 +1553,14 @@ function goToMarket() {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-danger);
-  color: white;
+  background: var(--sl-error);
+  color: var(--sl-text-inverse);
   font-size: 12px;
   font-weight: 700;
 }
 
 .error-text {
-  color: var(--color-danger);
+  color: var(--sl-error);
   font-size: 14px;
 }
 
@@ -1577,8 +1577,8 @@ function goToMarket() {
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border: 3px solid var(--sl-border);
+  border-top-color: var(--sl-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1591,7 +1591,7 @@ function goToMarket() {
 
 .loading-text {
   margin-top: 16px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   font-size: 14px;
 }
 
@@ -1606,20 +1606,20 @@ function goToMarket() {
 }
 
 .empty-icon {
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   margin-bottom: 16px;
 }
 
 .empty-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0 0 8px 0;
 }
 
 .empty-desc {
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   margin: 0;
   max-width: 320px;
 }
@@ -1784,9 +1784,7 @@ function goToMarket() {
 }
 
 .plugin-content {
-  padding: 2px;
-  padding-top: 8px;
-  padding-left: 32px;
+  padding: 8px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1838,25 +1836,27 @@ function goToMarket() {
 .plugin-name {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .plugin-version {
   flex-shrink: 0;
   padding: 1px 5px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 4px;
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .plugin-author {
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
 }
 
 .plugin-author-row {
@@ -1876,20 +1876,20 @@ function goToMarket() {
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .repo-link-btn:hover {
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   color: var(--sl-primary);
 }
 
 .plugin-description {
   margin: 6px 0;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1900,7 +1900,7 @@ function goToMarket() {
 .plugin-error-message {
   margin: 4px 0 0;
   font-size: 12px;
-  color: var(--color-danger);
+  color: var(--sl-error);
   line-height: 1.4;
   word-break: break-word;
 }
@@ -1910,7 +1910,7 @@ function goToMarket() {
   align-items: center;
   justify-content: space-between;
   padding-top: 8px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--sl-border);
   margin-top: auto;
 }
 
@@ -1959,7 +1959,7 @@ function goToMarket() {
   position: relative;
   width: 36px;
   height: 20px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 10px;
   transition: background 0.2s ease;
 }
@@ -1971,14 +1971,14 @@ function goToMarket() {
   left: 2px;
   width: 16px;
   height: 16px;
-  background: white;
+  background: var(--sl-surface);
   border-radius: 50%;
   transition: transform 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background: #4ade80;
+  background: var(--sl-primary);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {
@@ -2258,15 +2258,15 @@ function goToMarket() {
   height: 28px;
   border: none;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .plugin-menu-btn:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-primary);
 }
 
 .plugin-menu-dropdown {
@@ -2289,7 +2289,7 @@ function goToMarket() {
   padding: 8px 12px;
   background: none;
   border: none;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   text-align: left;
   cursor: pointer;
   border-radius: 4px;
@@ -2319,9 +2319,9 @@ function goToMarket() {
   justify-content: center;
   width: 20px;
   height: 20px;
-  background: var(--color-primary);
+  background: var(--sl-primary);
   border-radius: 50%;
-  color: white;
+  color: var(--sl-text-inverse);
 }
 
 .dependency-indicator {

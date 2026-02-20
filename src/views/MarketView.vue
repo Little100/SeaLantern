@@ -424,7 +424,7 @@ onMounted(() => {
 .market-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0;
 }
 
@@ -437,24 +437,24 @@ onMounted(() => {
 .market-search {
   padding: 8px 16px;
   border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-bg-secondary);
+  color: var(--sl-text-primary);
   font-size: 14px;
   width: 240px;
 }
 
 .market-search:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--sl-primary);
 }
 
 .refresh-btn {
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-bg-secondary);
+  color: var(--sl-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -462,8 +462,8 @@ onMounted(() => {
 }
 
 .refresh-btn:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-primary);
 }
 
 .market-tags {
@@ -476,21 +476,21 @@ onMounted(() => {
 .tag-btn {
   padding: 6px 12px;
   border-radius: 16px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-bg-secondary);
+  color: var(--sl-text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tag-btn:hover {
-  border-color: var(--color-primary);
+  border-color: var(--sl-primary);
 }
 
 .tag-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--sl-primary);
+  border-color: var(--sl-primary);
   color: white;
 }
 
@@ -503,14 +503,14 @@ onMounted(() => {
   justify-content: center;
   padding: 64px 24px;
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
 }
 
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border: 3px solid var(--sl-border);
+  border-top-color: var(--sl-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -528,13 +528,13 @@ onMounted(() => {
 .error-title {
   font-size: 16px;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 16px 0 8px;
 }
 
 .error-detail {
   font-size: 14px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   margin: 0 0 16px;
 }
 
@@ -542,7 +542,7 @@ onMounted(() => {
   padding: 8px 24px;
   border-radius: 8px;
   border: none;
-  background: var(--color-primary);
+  background: var(--sl-primary);
   color: white;
   cursor: pointer;
 }
@@ -560,7 +560,7 @@ onMounted(() => {
 }
 
 .market-card {
-  padding: 16px;
+  padding: 18px;
   border-radius: 12px;
   cursor: pointer;
   transition:
@@ -568,6 +568,7 @@ onMounted(() => {
     box-shadow 0.2s;
   display: flex;
   gap: 12px;
+  box-sizing: border-box;
 }
 
 .market-card:hover {
@@ -581,7 +582,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .card-icon img {
@@ -600,37 +601,40 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .card-name {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
+  word-wrap: break-word;
 }
 
 .card-version {
   padding: 2px 6px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 4px;
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .card-author {
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
+  margin-bottom: 10px;
 }
 
 .card-desc {
-  margin: 8px 0;
+  margin: 0 0 12px 0;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-wrap: break-word;
 }
 
 .card-deps {
@@ -642,19 +646,21 @@ onMounted(() => {
 }
 
 .deps-label {
-  color: var(--color-warning, #f59e0b);
+  color: var(--sl-warning);
   font-weight: 500;
 }
 
 .deps-list {
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
 }
 
 .card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 14px;
+  padding-top: 8px;
+  border-top: 1px solid var(--sl-border);
 }
 
 .card-tags {
@@ -664,17 +670,17 @@ onMounted(() => {
 
 .card-tag {
   padding: 2px 8px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 4px;
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .install-btn {
   padding: 6px 16px;
   border-radius: 6px;
   border: none;
-  background: var(--color-primary);
+  background: var(--sl-primary);
   color: white;
   font-size: 13px;
   cursor: pointer;
@@ -690,13 +696,13 @@ onMounted(() => {
 }
 
 .install-btn.installed {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-secondary);
 }
 
 .install-btn.is-enabled {
-  background: var(--color-bg-tertiary);
-  color: var(--color-warning, #eab308);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-warning);
   font-size: 12px;
 }
 
@@ -728,14 +734,14 @@ onMounted(() => {
   padding: 8px;
   border: none;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   cursor: pointer;
   border-radius: 8px;
 }
 
 .modal-close:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-primary);
 }
 
 .detail-header {
@@ -751,7 +757,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
 }
 
 .detail-icon img {
@@ -764,23 +770,23 @@ onMounted(() => {
 .detail-title h2 {
   margin: 0;
   font-size: 20px;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
 }
 
 .detail-version {
   display: inline-block;
   padding: 2px 8px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 4px;
   font-size: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--sl-text-tertiary);
   margin-top: 4px;
 }
 
 .detail-author {
   display: block;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   margin-top: 4px;
 }
 
@@ -796,7 +802,7 @@ onMounted(() => {
 
 .detail-desc {
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   line-height: 1.6;
   margin: 0 0 16px;
 }
@@ -808,7 +814,7 @@ onMounted(() => {
 .detail-section h3 {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sl-text-primary);
   margin: 0 0 8px;
 }
 
@@ -824,9 +830,9 @@ onMounted(() => {
   font-size: 12px;
   font-weight: 500;
   cursor: default;
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-secondary);
+  border: 1px solid var(--sl-border);
 }
 
 .perm-badge--dangerous {
@@ -844,10 +850,10 @@ onMounted(() => {
 .changelog {
   margin: 0;
   padding: 12px;
-  background: var(--color-bg-tertiary);
+  background: var(--sl-bg-tertiary);
   border-radius: 8px;
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   white-space: pre-wrap;
   max-height: 200px;
   overflow-y: auto;
@@ -862,7 +868,7 @@ onMounted(() => {
   padding: 10px 32px;
   border-radius: 8px;
   border: none;
-  background: var(--color-primary);
+  background: var(--sl-primary);
   color: white;
   font-size: 14px;
   font-weight: 500;
@@ -878,19 +884,19 @@ onMounted(() => {
 }
 
 .install-btn-lg.installed {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-secondary);
 }
 
 .install-btn-lg.is-enabled {
-  background: var(--color-bg-tertiary);
-  color: var(--color-warning, #eab308);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-warning);
   font-size: 13px;
 }
 
 .refresh-btn.active {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--sl-primary);
+  color: var(--sl-primary);
 }
 
 .url-editor {
@@ -905,7 +911,7 @@ onMounted(() => {
 
 .url-editor-label {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--sl-text-secondary);
   white-space: nowrap;
 }
 
@@ -914,22 +920,22 @@ onMounted(() => {
   min-width: 200px;
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-primary);
   font-size: 13px;
 }
 
 .url-editor-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--sl-primary);
 }
 
 .url-editor-btn {
   padding: 6px 14px;
   border-radius: 6px;
   border: none;
-  background: var(--color-primary);
+  background: var(--sl-primary);
   color: white;
   font-size: 13px;
   cursor: pointer;
@@ -941,14 +947,14 @@ onMounted(() => {
 }
 
 .url-editor-btn--reset {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--sl-bg-tertiary);
+  color: var(--sl-text-secondary);
+  border: 1px solid var(--sl-border);
 }
 
 .url-editor-btn--reset:hover {
   opacity: 1;
-  border-color: var(--color-danger, #ef4444);
-  color: var(--color-danger, #ef4444);
+  border-color: var(--sl-error);
+  color: var(--sl-error);
 }
 </style>

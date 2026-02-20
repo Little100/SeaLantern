@@ -446,7 +446,7 @@ function computeOverallProgress() {
 
 .win-btn-close:hover {
   background: var(--sl-error);
-  color: white;
+  color: var(--sl-text-inverse);
 }
 
 /* locale download UI removed */
